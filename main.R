@@ -1,7 +1,8 @@
 library(dplyr)
 library(invgamma)
 library(TTR)
-library(mvtnorm)
+#library(mvtnorm)
+library(MASS)
 library(Rcpp)
 
 # Make sure your compiler enable C++ 11 standard.
@@ -17,7 +18,7 @@ for(i in 1:length(funList)){
 
 # declare parameters
 r     <- 0.02
-delta <- 1
+delta <- 0.1
 kappa <- 2
 nu    <- 0.15
 eta   <- 0.3
