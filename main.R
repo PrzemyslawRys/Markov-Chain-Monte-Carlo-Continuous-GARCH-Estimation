@@ -21,8 +21,10 @@ delta <- 1
 kappa <- 2
 nu    <- 0.15
 eta   <- 0.3
-dt    <- 1/ (252 * 7 * 60)
-N     <- 15 * (252 * 7 * 60)
+dt    <- 1/ (252 * 404)
+N     <- 15 * (252 * 405)
+
+resultPath <- "results/StoneColdClassicMins.Rds"
 
 #_____________________________________
 #  0. Generate the data                     
@@ -44,9 +46,9 @@ R <- generateRSeries(gamma, v, dt)
 #_____________________________________
 
 # technical settings
-numberOfLoops <- 3000
+numberOfLoops <- 20000
 
-vCurrent       <- getHistoricalVarianceSeries(R, 5 * 7 * 60, dt)
+vCurrent       <- getHistoricalVarianceSeries(R, 5 * 405, dt)
 vCurrentMAD    <- numeric(numberOfLoops)
 vCurrentMAD[1] <- mean(abs(vCurrent - v))
 vEstimate      <- vCurrent
@@ -56,15 +58,15 @@ vEstimate      <- vCurrent
 mu_0       <- mean(R)
 sigma2_0   <- 1
 # - for (alpha, beta) direct approach
-sigma2_A   <- runMean(R, 60 * 7) %>% na.omit() %>% var()
-sigma2_B   <- runCor(vCurrent[-1],vCurrent[-(N+1)], 60 * 7) %>% na.omit() %>% var()
+sigma2_A   <- runMean(R, 405) %>% na.omit() %>% var()
+sigma2_B   <- runCor(vCurrent[-1],vCurrent[-(N+1)], 405) %>% na.omit() %>% var()
 mu_A       <- 0
 mu_B       <- cor(vCurrent[-1],vCurrent[-(N+1)])
 # additional calculations for eta and V_0: fitting moments
 eta2_mean  <- var(vCurrent[-1]/ vCurrent[-(N+1)]) / dt
-eta2_var   <- (runVar(vCurrent[-1]/ vCurrent[-(N+1)], n = 60 * 7) / dt) %>% na.omit() %>% var()
+eta2_var   <- (runVar(vCurrent[-1]/ vCurrent[-(N+1)], n = 405) / dt) %>% na.omit() %>% var()
 v_mean     <- mean(vCurrent)
-v_var      <- runMean(vCurrent, n = 60 * 7) %>% na.omit() %>% var()
+v_var      <- runMean(vCurrent, n = 405) %>% na.omit() %>% var()
 # - for eta^2
 etaAlpha_0 <- (eta2_mean^2 / eta2_var) - 2
 etaBeta_0  <- eta2_mean * (etaAlpha_0  - 1)
@@ -120,17 +122,7 @@ for(i in 2:numberOfLoops){
                          etaBeta_0)
   
    #Metropolis-Hastings for v
-  # vCurrent <-
-  #    drawVSeriesFromPosteriorMetropolisHastings(vCurrent,
-  #                                               R,
-  #                                               alphaSeries[i],
-  #                                               betaSeries[i],
-  #                                               gammaSeries[i],
-  #                                               etaSeries[i],
-  #                                               dt,
-  #                                               alpha_V,
-  #                                               beta_V)
-  # 
+   
   vCurrent <-
     drawVSeriesFromPosteriorMetropolisHastingsRCPP(vCurrent,
                                                R,
@@ -141,15 +133,28 @@ for(i in 2:numberOfLoops){
                                                dt,
                                                alpha_V,
                                                beta_V)
-  
-  #vSeries <- v
+
+  # vCurrent <- v
 
   # update vEstimate
   vEstimate <- vEstimate * (i - 1) / i + vCurrent
   # save MAD information about v
   vCurrentMAD[i]  <- mean(abs(vCurrent - v))
   
-  cat(i, " : 3000 \n")
+  if(i %% 1000 == 0){
+    cat(i, " done.", Sys.time() %>% as.character(), "\n")
+    list(v = v,
+         R = R,
+         alphaSeries = alphaSeries,
+         betaSeries = betaSeries,
+         gammaSeries = gammaSeries,
+         etaSeries = etaSeries,
+         vCurrent = vCurrent,
+         vEstimate = vEstimate,
+         vCurrentMAD = vCurrentMAD) %>%
+    saveRDS(resultPath)
+  }
+  
 }
 
 #_____________________________________
