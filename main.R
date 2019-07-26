@@ -1,8 +1,7 @@
 library(dplyr)
 library(invgamma)
 library(TTR)
-#library(mvtnorm)
-library(MASS)
+library(mvtnorm)
 library(Rcpp)
 
 # Make sure your compiler enable C++ 11 standard.
@@ -18,14 +17,14 @@ for(i in 1:length(funList)){
 
 # declare parameters
 r     <- 0.02
-delta <- 0.1
-kappa <- 2
-nu    <- 0.15
-eta   <- 0.3
-dt    <- 1/ (252 * 404)
+delta <- -0.2
+kappa <- 0.5
+nu    <- 0.40
+eta   <- 2
+dt    <- 1/ (252 * 405)
 N     <- 15 * (252 * 405)
 
-resultPath <- "results/StoneColdClassicMins.Rds"
+resultPath <- "results/RollerCoasterDevilHours.Rds"
 
 #_____________________________________
 #  0. Generate the data                     
@@ -49,7 +48,7 @@ R <- generateRSeries(gamma, v, dt)
 # technical settings
 numberOfLoops <- 20000
 
-vCurrent       <- getHistoricalVarianceSeries(R, 5 * 405, dt)
+vCurrent       <- getHistoricalVarianceSeries(R, 21 * 7, dt)
 vCurrentMAD    <- numeric(numberOfLoops)
 vCurrentMAD[1] <- mean(abs(vCurrent - v))
 vEstimate      <- vCurrent
@@ -59,15 +58,15 @@ vEstimate      <- vCurrent
 mu_0       <- mean(R)
 sigma2_0   <- 1
 # - for (alpha, beta) direct approach
-sigma2_A   <- runMean(R, 405) %>% na.omit() %>% var()
-sigma2_B   <- runCor(vCurrent[-1],vCurrent[-(N+1)], 405) %>% na.omit() %>% var()
+sigma2_A   <- runMean(R, 7 * 5) %>% na.omit() %>% var()
+sigma2_B   <- runCor(vCurrent[-1],vCurrent[-(N+1)], 7 * 5) %>% na.omit() %>% var()
 mu_A       <- 0
 mu_B       <- cor(vCurrent[-1],vCurrent[-(N+1)])
 # additional calculations for eta and V_0: fitting moments
 eta2_mean  <- var(vCurrent[-1]/ vCurrent[-(N+1)]) / dt
-eta2_var   <- (runVar(vCurrent[-1]/ vCurrent[-(N+1)], n = 405) / dt) %>% na.omit() %>% var()
+eta2_var   <- (runVar(vCurrent[-1]/ vCurrent[-(N+1)], n = 7 * 5) / dt) %>% na.omit() %>% var()
 v_mean     <- mean(vCurrent)
-v_var      <- runMean(vCurrent, n = 405) %>% na.omit() %>% var()
+v_var      <- runMean(vCurrent, n = 7 * 5) %>% na.omit() %>% var()
 # - for eta^2
 etaAlpha_0 <- (eta2_mean^2 / eta2_var) - 2
 etaBeta_0  <- eta2_mean * (etaAlpha_0  - 1)
@@ -138,7 +137,7 @@ for(i in 2:numberOfLoops){
   # vCurrent <- v
 
   # update vEstimate
-  vEstimate <- vEstimate * (i - 1) / i + vCurrent
+  vEstimate <- vEstimate * (i - 1) / i + vCurrent / i
   # save MAD information about v
   vCurrentMAD[i]  <- mean(abs(vCurrent - v))
   
@@ -197,7 +196,7 @@ abline(h = gamma, col = "red")
 
 alphaSeries %>% plot(type = "l")
 alphaSeries[-(1:100)] %>% plot(type = "l")
-((alphaSeries[-(1:100)] %>% cumsum()) / (1:2900)) %>% plot(type = "l")
+((alphaSeries %>% cumsum()) / (1:numberOfLoops)) %>% plot(type = "l")
 abline(h = alpha, col = "red")
 
 betaSeries %>% plot(type = "l")
@@ -208,7 +207,7 @@ abline(h = beta, col = "red")
 
 etaSeries %>% plot(type = "l")
 etaSeries[-(1:100)] %>% plot(type = "l")
-((etaSeries %>% cumsum()) / (1:3000)) %>% plot(type = "l")
+((etaSeries %>% cumsum()) / (1:numberOfLoops)) %>% plot(type = "l")
 ((etaSeries[-(1:100)] %>% cumsum()) / (1:2900)) %>% plot(type = "l")
 
 vCurrentMAD %>% plot(type = "l")
