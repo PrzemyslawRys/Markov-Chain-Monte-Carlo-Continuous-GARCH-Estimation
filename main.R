@@ -16,15 +16,15 @@ for(i in 1:length(funList)){
 
 
 # declare parameters
-r     <- 0.02
+r     <- 0.1
 delta <- -0.2
 kappa <- 0.5
-nu    <- 0.40
-eta   <- 2
+nu    <- 0.4
+eta   <- 0.2
 dt    <- 1/ (252 * 405)
 N     <- 15 * (252 * 405)
 
-resultPath <- "results/RollerCoasterDevilHours.Rds"
+resultPath <- "results/RollerCoasterDevilDays.Rds"
 
 #_____________________________________
 #  0. Generate the data                     
@@ -48,7 +48,7 @@ R <- generateRSeries(gamma, v, dt)
 # technical settings
 numberOfLoops <- 20000
 
-vCurrent       <- getHistoricalVarianceSeries(R, 21 * 7, dt)
+vCurrent       <- getHistoricalVarianceSeries(R, 21, dt)
 vCurrentMAD    <- numeric(numberOfLoops)
 vCurrentMAD[1] <- mean(abs(vCurrent - v))
 vEstimate      <- vCurrent
@@ -154,73 +154,4 @@ for(i in 2:numberOfLoops){
          vCurrentMAD = vCurrentMAD) %>%
     saveRDS(resultPath)
   }
-  
 }
-
-#_____________________________________
-#  3. MCMC estimation: results
-#_____________________________________
-
-# estimate parameters by mean from Markov chain
-gammaEstimate <- mean(gammaSeries)
-alphaEstimate <- mean(alphaSeries)
-betaEstimate  <- mean(betaSeries)
-etaEstimate   <- mean(etaSeries)
-
-#_____________________________________
-#  4. MCMC estimation: verification
-#_____________________________________
-
-# plots and stats
-
-# check
-getModelParameters(gamma, alpha, beta, eta, dt)
-getModelParameters(gammaEstimate, alphaEstimate, betaEstimate, etaEstimate, dt)
-
-# ______________________________________
-
-# estimate gamma
-
-gamma_est <- (sum(R[-1]) + dt * mu_0 / sigma2_0) / (sum(v) + dt / sigma2_0)
-
-cat("delta = \n", delta, "\n",
-    "delta = \n", gamma_est / dt, "\n",
-    "mu_0 / dt = \n", mu_0 / dt, "\n",
-    "sigma2_0 = \n", sigma2_0)
-
-# eta ok, gamma ok,
-# w GB alpha jest super wrażliwa na zmiany bety
-gammaSeries %>% plot()
-((gammaSeries %>% cumsum()) / (1:numberOfLoops)) %>% plot(type = "l")
-abline(h = gamma, col = "red")
-
-alphaSeries %>% plot(type = "l")
-alphaSeries[-(1:100)] %>% plot(type = "l")
-((alphaSeries %>% cumsum()) / (1:numberOfLoops)) %>% plot(type = "l")
-abline(h = alpha, col = "red")
-
-betaSeries %>% plot(type = "l")
-betaSeries[-(1:100)] %>% plot(type = "l")
-((betaSeries[-(1:100)] %>% cumsum()) / (1:2900)) %>% plot(type = "l")
-abline(h = beta, col = "red")
-
-
-etaSeries %>% plot(type = "l")
-etaSeries[-(1:100)] %>% plot(type = "l")
-((etaSeries %>% cumsum()) / (1:numberOfLoops)) %>% plot(type = "l")
-((etaSeries[-(1:100)] %>% cumsum()) / (1:2900)) %>% plot(type = "l")
-
-vCurrentMAD %>% plot(type = "l")
-
-# check
-gamma
-gammaEstimate
-gammaSeries[1]
-
-alpha
-alphaEstimate
-alphaSeries[1]
-
-beta
-betaEstimate
-betaSeries[1]
