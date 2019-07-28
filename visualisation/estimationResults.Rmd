@@ -135,12 +135,12 @@ stoneColdClassicEstimatorsDays %>%
 # Chillout Ride Case
 
 ```{r}
-stoneColdSchemeParametersMin  <- getSchemeParameters(0.1,2,0.15,0.3,1 / (252 * 405))
-stoneColdParamsMin            <- c(stoneColdSchemeParametersMin[,1:3] %>% as.numeric(), 0.3, 0.1, 2, 0.15)
-stoneColdSchemeParametersHour <- getSchemeParameters(0.1,2,0.15,0.3,1 / (252 * 7))
-stoneColdParamsHour           <- c(stoneColdSchemeParametersHour[,1:3] %>% as.numeric(), 0.3, 0.1, 2, 0.15)
-stoneColdSchemeParametersDay  <- getSchemeParameters(0.1,2,0.15,0.3,1 / (252))
-stoneColdParamsDay            <- c(stoneColdSchemeParametersDay[,1:3] %>% as.numeric(), 0.3, 0.1, 2, 0.15)
+stoneColdSchemeParametersMin  <- getSchemeParameters(0,10,0.1,0.05,1 / (252 * 405))
+stoneColdParamsMin            <- c(stoneColdSchemeParametersMin[,1:3] %>% as.numeric(), 0.05, 0, 10, 0.1)
+stoneColdSchemeParametersHour <- getSchemeParameters(0,10,0.1,0.05,1 / (252 * 7))
+stoneColdParamsHour           <- c(stoneColdSchemeParametersHour[,1:3] %>% as.numeric(), 0.05, 0, 10, 0.1)
+stoneColdSchemeParametersDay  <- getSchemeParameters(0,10,0.1,0.05,1 / (252))
+stoneColdParamsDay            <- c(stoneColdSchemeParametersDay[,1:3] %>% as.numeric(), 0.05, 0, 10, 0.1)
 
 chilloutRideEstimatorsMins <- bind_cols(params = stoneColdParamsMin,
                                             MCMC = getEstimatorsFromResults(ChilloutRideMins, 1 / (252 * 405)),
@@ -230,12 +230,12 @@ chilloutRideEstimatorsDays %>%
 # Roller Coaster Devil
 
 ```{r}
-stoneColdSchemeParametersMin  <- getSchemeParameters(0.1,2,0.15,0.3,1 / (252 * 405))
-stoneColdParamsMin            <- c(stoneColdSchemeParametersMin[,1:3] %>% as.numeric(), 0.3, 0.1, 2, 0.15)
-stoneColdSchemeParametersHour <- getSchemeParameters(0.1,2,0.15,0.3,1 / (252 * 7))
-stoneColdParamsHour           <- c(stoneColdSchemeParametersHour[,1:3] %>% as.numeric(), 0.3, 0.1, 2, 0.15)
-stoneColdSchemeParametersDay  <- getSchemeParameters(0.1,2,0.15,0.3,1 / (252))
-stoneColdParamsDay            <- c(stoneColdSchemeParametersDay[,1:3] %>% as.numeric(), 0.3, 0.1, 2, 0.15)
+stoneColdSchemeParametersMin  <- getSchemeParameters(-0.2,0.5,0.40,2,1 / (252 * 405))
+stoneColdParamsMin            <- c(stoneColdSchemeParametersMin[,1:3] %>% as.numeric(), 2, -0.2, 0.5, 0.40)
+stoneColdSchemeParametersHour <- getSchemeParameters(-0.2,0.5,0.40,2,1 / (252 * 7))
+stoneColdParamsHour           <- c(stoneColdSchemeParametersHour[,1:3] %>% as.numeric(), 2, -0.2, 0.5, 0.40)
+stoneColdSchemeParametersDay  <- getSchemeParameters(-0.2,0.5,0.40,2,1 / (252))
+stoneColdParamsDay            <- c(stoneColdSchemeParametersDay[,1:3] %>% as.numeric(), 2, -0.2, 0.5, 0.40)
 
 rollerCoasterDevilEstimatorsMins <- bind_cols(params = stoneColdParamsMin,
                                             MCMC = getEstimatorsFromResults(RollerCoasterDevilMins, 1 / (252 * 405)),
