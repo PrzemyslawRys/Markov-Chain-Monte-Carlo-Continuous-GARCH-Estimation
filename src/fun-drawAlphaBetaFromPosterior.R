@@ -15,7 +15,7 @@ drawAlphaBetaFromPosterior <- function(v, eta, dt, mu_A, mu_B, sigma2_A, sigma2_
   sigma2_beta  <- sigma2_alpha * X / Y
   xi           <- 1 - 1 / (2 * sigma2_alpha * X)
   
-  mvrnorm(1, mu = c(mu_alpha, mu_beta),
+  MASS::mvrnorm(1, mu = c(mu_alpha, mu_beta),
           Sigma = matrix(c(sigma2_alpha, sqrt(sigma2_alpha * sigma2_beta) * xi,
                            sqrt(sigma2_alpha * sigma2_beta) * xi, sigma2_beta),
                          2,2)) %>%

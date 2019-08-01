@@ -1,0 +1,71 @@
+---
+title: "volatility estimates"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache = FALSE)
+options(scipen = 999999)
+
+library(dplyr)
+library(TTR)
+library(mvtnorm)
+library(Rcpp)
+library(knitr)
+library(kableExtra)
+
+source("../src/fun-getStats.R")
+source("../src/fun-getStatsSingle.R")
+source("../src/fun-getComparisonStats.R")
+source("../src/fun-getHistoricalVarianceSeries.R")
+```
+
+```{r read}
+StoneColdClassicMins  <- readRDS("../results/StoneColdClassicMins.Rds")
+StoneColdClassicHours <- readRDS("../results/StoneColdClassicHours.Rds")
+StoneColdClassicDays  <- readRDS("../results/StoneColdClassicDays.Rds")
+
+ChilloutRideMins  <- readRDS("../results/ChilloutRideMins.Rds")
+ChilloutRideHours <- readRDS("../results/ChilloutRideHours.Rds")
+ChilloutRideDays  <- readRDS("../results/ChilloutRideDays.Rds")
+
+RollerCoasterDevilMins  <- readRDS("../results/RollerCoasterDevilMins.Rds")
+RollerCoasterDevilHours <- readRDS("../results/RollerCoasterDevilHours.Rds")
+RollerCoasterDevilDays  <- readRDS("../results/RollerCoasterDevilDays.Rds")
+```
+
+## Stone Cold Classic stats
+
+```{r}
+
+```
+
+## Chillout Ride stats
+
+```{r}
+bind_cols(getComparisonStats(ChilloutRideMins$vEstimate,
+                   ChilloutRideMins$v) * 100,
+          getComparisonStats(getHistoricalVarianceSeries(StoneColdClassicMins$R, 60, 1 / (252 * 405)),
+                             ChilloutRideMins$v),
+          getComparisonStats(getHistoricalVarianceSeries(StoneColdClassicMins$R, 405, 1 / (252 * 405)),
+                             ChilloutRideMins$v),
+          getComparisonStats(getHistoricalVarianceSeries(StoneColdClassicMins$R, 2025, 1 / (252 * 405)),
+                             ChilloutRideMins$v),
+          getComparisonStats(getHistoricalVarianceSeries(StoneColdClassicMins$R, 8505, 1 / (252 * 405)),
+                             ChilloutRideMins$v),
+          getComparisonStats(ChilloutRideHours$vEstimate,
+                   ChilloutRideHours$v) * 100,
+          getComparisonStats(ChilloutRideDays$vEstimate,
+                   ChilloutRideDays$v) * 100) %>%
+  kable(caption = "mins",
+        digits = 2) %>%
+  kable_styling(bootstrap_options = c("striped", "hover"))
+
+cat(c("min", "q1%", "q5%", "mean", "median", "q95%", "q99%", "max", "sd"))
+```
+
+## Roller Coaster Devil stats
+
+```{r}
+
+```

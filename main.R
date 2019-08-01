@@ -16,15 +16,16 @@ for(i in 1:length(funList)){
 
 
 # declare parameters
-r     <- 0.1
-delta <- -0.2
-kappa <- 0.5
-nu    <- 0.4
-eta   <- 0.2
+r     <- 0.02
+
+delta <- 0
+kappa <- 10
+nu    <- 0.1
+eta   <- 0.05
 dt    <- 1/ (252 * 405)
 N     <- 15 * (252 * 405)
 
-resultPath <- "results/RollerCoasterDevilDays.Rds"
+resultPath <- "results/ChilloutRideMins_withEta.Rds"
 
 #_____________________________________
 #  0. Generate the data                     
@@ -47,8 +48,11 @@ R <- generateRSeries(gamma, v, dt)
 
 # technical settings
 numberOfLoops <- 20000
+# mins 5 * 405 ; 405
+# hours 21 * 7 ; 5 * 7
+# days  63 : 21
 
-vCurrent       <- getHistoricalVarianceSeries(R, 21, dt)
+vCurrent       <- getHistoricalVarianceSeries(R, 63, dt)
 vCurrentMAD    <- numeric(numberOfLoops)
 vCurrentMAD[1] <- mean(abs(vCurrent - v))
 vEstimate      <- vCurrent
@@ -58,15 +62,15 @@ vEstimate      <- vCurrent
 mu_0       <- mean(R)
 sigma2_0   <- 1
 # - for (alpha, beta) direct approach
-sigma2_A   <- runMean(R, 7 * 5) %>% na.omit() %>% var()
-sigma2_B   <- runCor(vCurrent[-1],vCurrent[-(N+1)], 7 * 5) %>% na.omit() %>% var()
+sigma2_A   <- runMean(R, 21) %>% na.omit() %>% var()
+sigma2_B   <- runCor(vCurrent[-1],vCurrent[-(N+1)], 21) %>% na.omit() %>% var()
 mu_A       <- 0
 mu_B       <- cor(vCurrent[-1],vCurrent[-(N+1)])
 # additional calculations for eta and V_0: fitting moments
 eta2_mean  <- var(vCurrent[-1]/ vCurrent[-(N+1)]) / dt
-eta2_var   <- (runVar(vCurrent[-1]/ vCurrent[-(N+1)], n = 7 * 5) / dt) %>% na.omit() %>% var()
+eta2_var   <- (runVar(vCurrent[-1]/ vCurrent[-(N+1)], n = 21) / dt) %>% na.omit() %>% var()
 v_mean     <- mean(vCurrent)
-v_var      <- runMean(vCurrent, n = 7 * 5) %>% na.omit() %>% var()
+v_var      <- runMean(vCurrent, n = 21) %>% na.omit() %>% var()
 # - for eta^2
 etaAlpha_0 <- (eta2_mean^2 / eta2_var) - 2
 etaBeta_0  <- eta2_mean * (etaAlpha_0  - 1)
@@ -87,6 +91,8 @@ alphaSeries[1] <- mu_A
 betaSeries[1]  <- mu_B
 etaSeries[1]   <- sqrt(eta2_mean)
 
+# for with_eta
+etaSeries[1]   <- eta
 #_____________________________________
 #  1. MCMC estimation: core
 #_____________________________________
@@ -113,13 +119,15 @@ for(i in 2:numberOfLoops){
   betaSeries[i]  <-
     tempAlphaBeta$beta
   
-  etaSeries[i]   <-
-    drawEtaFromPosterior(N,
-                         vCurrent,
-                         alphaSeries[i],
-                         betaSeries[i],
-                         etaAlpha_0,
-                         etaBeta_0)
+  # etaSeries[i]   <-
+  #   drawEtaFromPosterior(N,
+  #                        vCurrent,
+  #                        alphaSeries[i],
+  #                        betaSeries[i],
+  #                        etaAlpha_0,
+  #                        etaBeta_0)
+  
+  etaSeries[i] <- eta
   
    #Metropolis-Hastings for v
    
