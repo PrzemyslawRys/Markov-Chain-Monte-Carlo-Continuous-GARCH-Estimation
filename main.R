@@ -25,7 +25,7 @@ eta   <- 0.05
 dt    <- 1/ (252 * 405)
 N     <- 15 * (252 * 405)
 
-resultPath <- "results/ChilloutRideMins_withEta.Rds"
+resultPath <- "results/SPXMins_withEta40.Rds"
 
 #_____________________________________
 #  0. Generate the data                     
@@ -52,7 +52,7 @@ numberOfLoops <- 20000
 # hours 21 * 7 ; 5 * 7
 # days  63 : 21
 
-vCurrent       <- getHistoricalVarianceSeries(R, 63, dt)
+vCurrent       <- getHistoricalVarianceSeries(R, 5 * 405, dt)
 vCurrentMAD    <- numeric(numberOfLoops)
 vCurrentMAD[1] <- mean(abs(vCurrent - v))
 vEstimate      <- vCurrent
@@ -62,15 +62,15 @@ vEstimate      <- vCurrent
 mu_0       <- mean(R)
 sigma2_0   <- 1
 # - for (alpha, beta) direct approach
-sigma2_A   <- runMean(R, 21) %>% na.omit() %>% var()
-sigma2_B   <- runCor(vCurrent[-1],vCurrent[-(N+1)], 21) %>% na.omit() %>% var()
+sigma2_A   <- runMean(R, 405) %>% na.omit() %>% var()
+sigma2_B   <- runCor(vCurrent[-1],vCurrent[-(N+1)], 405) %>% na.omit() %>% var()
 mu_A       <- 0
 mu_B       <- cor(vCurrent[-1],vCurrent[-(N+1)])
 # additional calculations for eta and V_0: fitting moments
 eta2_mean  <- var(vCurrent[-1]/ vCurrent[-(N+1)]) / dt
-eta2_var   <- (runVar(vCurrent[-1]/ vCurrent[-(N+1)], n = 21) / dt) %>% na.omit() %>% var()
+eta2_var   <- (runVar(vCurrent[-1]/ vCurrent[-(N+1)], n = 405) / dt) %>% na.omit() %>% var()
 v_mean     <- mean(vCurrent)
-v_var      <- runMean(vCurrent, n = 21) %>% na.omit() %>% var()
+v_var      <- runMean(vCurrent, n = 405) %>% na.omit() %>% var()
 # - for eta^2
 etaAlpha_0 <- (eta2_mean^2 / eta2_var) - 2
 etaBeta_0  <- eta2_mean * (etaAlpha_0  - 1)
@@ -147,11 +147,11 @@ for(i in 2:numberOfLoops){
   # update vEstimate
   vEstimate <- vEstimate * (i - 1) / i + vCurrent / i
   # save MAD information about v
-  vCurrentMAD[i]  <- mean(abs(vCurrent - v))
+  #vCurrentMAD[i]  <- mean(abs(vCurrent - v))
   
   if(i %% 1000 == 0){
     cat(i, " done.", Sys.time() %>% as.character(), "\n")
-    list(v = v,
+    list(#v = v,
          R = R,
          alphaSeries = alphaSeries,
          betaSeries = betaSeries,

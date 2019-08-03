@@ -15,8 +15,8 @@ getComparisonStats <- function(series, series2){
   absRelDiffStats <- getStatsSingle(series$absRelDiff)
   
   data.frame(#diffStats       = getStatsSingle(series$diff) %>% as.numeric(),
-             absDiffStats    = getStatsSingle(series$absDiff) %>% as.numeric(),
+             absDiffStats    = 100 * (getStatsSingle(series$absDiff) %>% as.numeric()),
              #relDiffStats    = getStatsSingle(series$relDiff) %>% as.numeric(),
-             absRelDiffStats = getStatsSingle(series$absRelDiff) %>% as.numeric(),
+             absRelDiffStats = 100 * (getStatsSingle(series$absRelDiff) %>% as.numeric()),
              row.names = c("min", "q1%", "q5%", "mean", "median", "q95%", "q99%", "max", "sd"))
 }

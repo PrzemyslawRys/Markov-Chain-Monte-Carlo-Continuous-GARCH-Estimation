@@ -28,13 +28,13 @@ StoneColdClassicMins  <- readRDS("../results/StoneColdClassicMins_withEta.Rds")
 StoneColdClassicHours <- readRDS("../results/StoneColdClassicHours_withEta.Rds")
 StoneColdClassicDays  <- readRDS("../results/StoneColdClassicDays_withEta.Rds")
 
-# ChilloutRideMins  <- readRDS("../results/ChilloutRideMins_withEta.Rds")
-# ChilloutRideHours <- readRDS("../results/ChilloutRideHours_withEta.Rds")
-# ChilloutRideDays  <- readRDS("../results/ChilloutRideDays_withEta.Rds")
-# 
-# RollerCoasterDevilMins  <- readRDS("../results/RollerCoasterDevilMins_withEta.Rds")
-# RollerCoasterDevilHours <- readRDS("../results/RollerCoasterDevilHours_withEta.Rds")
-# RollerCoasterDevilDays  <- readRDS("../results/RollerCoasterDevilDays_withEta.Rds")
+ChilloutRideMins  <- readRDS("../results/ChilloutRideMins_withEta.Rds")
+ChilloutRideHours <- readRDS("../results/ChilloutRideHours_withEta.Rds")
+ChilloutRideDays  <- readRDS("../results/ChilloutRideDays_withEta.Rds")
+
+RollerCoasterDevilMins  <- readRDS("../results/RollerCoasterDevilMins_withEta.Rds")
+RollerCoasterDevilHours <- readRDS("../results/RollerCoasterDevilHours_withEta.Rds")
+RollerCoasterDevilDays  <- readRDS("../results/RollerCoasterDevilDays_withEta.Rds")
 ```
 
 # Stone Cold Classic case
@@ -134,7 +134,7 @@ stoneColdClassicEstimatorsDays %>%
 
 # Chillout Ride Case
 
-```{r, eval = FALSE}
+```{r}
 stoneColdSchemeParametersMin  <- getSchemeParameters(0,10,0.1,0.05,1 / (252 * 405))
 stoneColdParamsMin            <- c(stoneColdSchemeParametersMin[,1:3] %>% as.numeric(), 0.05, 0, 10, 0.1)
 stoneColdSchemeParametersHour <- getSchemeParameters(0,10,0.1,0.05,1 / (252 * 7))
@@ -229,7 +229,7 @@ chilloutRideEstimatorsDays %>%
 
 # Roller Coaster Devil
 
-```{r, eval = FALSE}
+```{r}
 stoneColdSchemeParametersMin  <- getSchemeParameters(-0.2,0.5,0.40,2,1 / (252 * 405))
 stoneColdParamsMin            <- c(stoneColdSchemeParametersMin[,1:3] %>% as.numeric(), 2, -0.2, 0.5, 0.40)
 stoneColdSchemeParametersHour <- getSchemeParameters(-0.2,0.5,0.40,2,1 / (252 * 7))
