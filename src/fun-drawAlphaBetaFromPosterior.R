@@ -15,12 +15,12 @@ drawAlphaBetaFromPosterior <- function(v, eta, dt, mu_A, mu_B, sigma2_A, sigma2_
   sigma2_beta  <- sigma2_alpha * X / Y
   xi           <- 1 - 1 / (2 * sigma2_alpha * X)
   
-  rmvnorm(1, mean = c(mu_alpha, mu_beta),
-          sigma = matrix(c(sigma2_alpha, sqrt(sigma2_alpha * sigma2_beta) * xi,
+  MASS::mvrnorm(1, mu = c(mu_alpha, mu_beta),
+          Sigma = matrix(c(sigma2_alpha, sqrt(sigma2_alpha * sigma2_beta) * xi,
                            sqrt(sigma2_alpha * sigma2_beta) * xi, sigma2_beta),
-                         2,2),
-          method=c("eigen", "svd", "chol"),
-          pre0.9_9994 = FALSE) %>%
+                         2,2)) %>%
+    as.data.frame() %>%
+    t() %>%
     as.data.frame() %>%
     rename(alpha = V1, beta = V2)
 }

@@ -1,0 +1,303 @@
+---
+title: "volatility estimates"
+output:
+  pdf_document:
+    keep_tex: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache = FALSE)
+options(scipen = 999999)
+
+library(dplyr)
+library(TTR)
+library(mvtnorm)
+library(Rcpp)
+library(knitr)
+library(kableExtra)
+library(ggplot2)
+library(reshape2)
+library(ggthemes)
+
+source("../src/fun-getStats.R")
+source("../src/fun-getStatsSingle.R")
+source("../src/fun-getComparisonStats.R")
+source("../src/fun-getRealizedVolatilitySeries.R")
+source("../src/fun-getRealizedVarianceSeries.R")
+```
+
+```{r read}
+timeAxis   <- readRDS("../data/2Ytimeaxis.Rds")
+statsNames <- c("min", "Q1%", "Q5%", "śr.", "med.", "Q95%", "Q99%", "maks.", "SD")
+
+StoneColdClassicMins             <- readRDS("../results/StoneColdClassicMins.Rds")
+StoneColdClassicMins$vol         <- sqrt(StoneColdClassicMins$v)
+StoneColdClassicMins$volEstimate <- sqrt(StoneColdClassicMins$vEstimate)
+   
+StoneColdClassicHours             <- readRDS("../results/StoneColdClassicHours.Rds")
+StoneColdClassicHours$vol         <- sqrt(StoneColdClassicHours$v)
+StoneColdClassicHours$volEstimate <- sqrt(StoneColdClassicHours$vEstimate)
+
+StoneColdClassicDays             <- readRDS("../results/StoneColdClassicDays.Rds")
+StoneColdClassicDays$vol         <- sqrt(StoneColdClassicDays$v)
+StoneColdClassicDays$volEstimate <- sqrt(StoneColdClassicDays$vEstimate)
+
+ChilloutRideMins             <- readRDS("../results/ChilloutRideMins.Rds")
+ChilloutRideMins$vol         <- sqrt(ChilloutRideMins$v)
+ChilloutRideMins$volEstimate <- sqrt(ChilloutRideMins$vEstimate)
+   
+ChilloutRideHours             <- readRDS("../results/ChilloutRideHours.Rds")
+ChilloutRideHours$vol         <- sqrt(ChilloutRideHours$v)
+ChilloutRideHours$volEstimate <- sqrt(ChilloutRideHours$vEstimate)
+
+ChilloutRideDays             <- readRDS("../results/ChilloutRideDays.Rds")
+ChilloutRideDays$vol         <- sqrt(ChilloutRideDays$v)
+ChilloutRideDays$volEstimate <- sqrt(ChilloutRideDays$vEstimate)
+
+RollerCoasterDevilMins             <- readRDS("../results/RollerCoasterDevilMins.Rds")
+RollerCoasterDevilMins$vol         <- sqrt(RollerCoasterDevilMins$v)
+RollerCoasterDevilMins$volEstimate <- sqrt(RollerCoasterDevilMins$vEstimate)
+   
+RollerCoasterDevilHours             <- readRDS("../results/RollerCoasterDevilHours.Rds")
+RollerCoasterDevilHours$vol         <- sqrt(RollerCoasterDevilHours$v)
+RollerCoasterDevilHours$volEstimate <- sqrt(RollerCoasterDevilHours$vEstimate)
+
+RollerCoasterDevilDays             <- readRDS("../results/RollerCoasterDevilDays.Rds")
+RollerCoasterDevilDays$vol         <- sqrt(RollerCoasterDevilDays$v)
+RollerCoasterDevilDays$volEstimate <- sqrt(RollerCoasterDevilDays$vEstimate)
+```
+
+```{r}
+stoneColdClassicStats <- bind_cols(getComparisonStats(StoneColdClassicMins$volEstimate,
+                                                  StoneColdClassicMins$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(StoneColdClassicMins$R, 60, 1 / (252 * 405)),
+                                                  StoneColdClassicMins$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(StoneColdClassicMins$R, 405, 1 / (252 * 405)),
+                                                  StoneColdClassicMins$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(StoneColdClassicMins$R, 2025, 1 / (252 * 405)),
+                                                  StoneColdClassicMins$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(StoneColdClassicMins$R, 8505, 1 / (252 * 405)),
+                                                  StoneColdClassicMins$vol),
+                               getComparisonStats(StoneColdClassicHours$volEstimate,
+                                                  StoneColdClassicHours$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(StoneColdClassicHours$R, 7, 1 / (252 * 7)),
+                                                  StoneColdClassicHours$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(StoneColdClassicHours$R, 35, 1 / (252 * 7)),
+                                                  StoneColdClassicHours$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(StoneColdClassicHours$R, 147, 1 / (252 * 7)),
+                                                  StoneColdClassicHours$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(StoneColdClassicHours$R, 441, 1 / (252 * 7)),
+                                                  StoneColdClassicHours$vol),
+                               getComparisonStats(StoneColdClassicDays$volEstimate,
+                                                  StoneColdClassicDays$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(StoneColdClassicDays$R, 7, 1 / 252),
+                                                  StoneColdClassicDays$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(StoneColdClassicDays$R, 21, 1 / 252),
+                                                  StoneColdClassicDays$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(StoneColdClassicDays$R, 63, 1 / 252),
+                                                  StoneColdClassicDays$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(StoneColdClassicDays$R, 186, 1 / 252),
+                                                  StoneColdClassicDays$vol))
+
+row.names(stoneColdClassicStats) <- statsNames
+
+chilloutRideStats <- bind_cols(getComparisonStats(ChilloutRideMins$volEstimate,
+                                                  ChilloutRideMins$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(ChilloutRideMins$R, 60, 1 / (252 * 405)),
+                                                  ChilloutRideMins$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(ChilloutRideMins$R, 405, 1 / (252 * 405)),
+                                                  ChilloutRideMins$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(ChilloutRideMins$R, 2025, 1 / (252 * 405)),
+                                                  ChilloutRideMins$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(ChilloutRideMins$R, 8505, 1 / (252 * 405)),
+                                                  ChilloutRideMins$vol),
+                               getComparisonStats(ChilloutRideHours$volEstimate,
+                                                  ChilloutRideHours$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(ChilloutRideHours$R, 7, 1 / (252 * 7)),
+                                                  ChilloutRideHours$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(ChilloutRideHours$R, 35, 1 / (252 * 7)),
+                                                  ChilloutRideHours$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(ChilloutRideHours$R, 147, 1 / (252 * 7)),
+                                                  ChilloutRideHours$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(ChilloutRideHours$R, 441, 1 / (252 * 7)),
+                                                  ChilloutRideHours$vol),
+                               getComparisonStats(ChilloutRideDays$volEstimate,
+                                                  ChilloutRideDays$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(ChilloutRideDays$R, 7, 1 / 252),
+                                                  ChilloutRideDays$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(ChilloutRideDays$R, 21, 1 / 252),
+                                                  ChilloutRideDays$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(ChilloutRideDays$R, 63, 1 / 252),
+                                                  ChilloutRideDays$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(ChilloutRideDays$R, 186, 1 / 252),
+                                                  ChilloutRideDays$vol))
+
+row.names(chilloutRideStats) <- statsNames
+
+
+rollerCoasterDevilStats <- bind_cols(getComparisonStats(RollerCoasterDevilMins$volEstimate,
+                                                  RollerCoasterDevilMins$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(RollerCoasterDevilMins$R, 60, 1 / (252 * 405)),
+                                                  RollerCoasterDevilMins$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(RollerCoasterDevilMins$R, 405, 1 / (252 * 405)),
+                                                  RollerCoasterDevilMins$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(RollerCoasterDevilMins$R, 2025, 1 / (252 * 405)),
+                                                  RollerCoasterDevilMins$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(RollerCoasterDevilMins$R, 8505, 1 / (252 * 405)),
+                                                  RollerCoasterDevilMins$vol),
+                               getComparisonStats(RollerCoasterDevilHours$volEstimate,
+                                                  RollerCoasterDevilHours$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(RollerCoasterDevilHours$R, 7, 1 / (252 * 7)),
+                                                  RollerCoasterDevilHours$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(RollerCoasterDevilHours$R, 35, 1 / (252 * 7)),
+                                                  RollerCoasterDevilHours$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(RollerCoasterDevilHours$R, 147, 1 / (252 * 7)),
+                                                  RollerCoasterDevilHours$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(RollerCoasterDevilHours$R, 441, 1 / (252 * 7)),
+                                                  RollerCoasterDevilHours$vol),
+                               getComparisonStats(RollerCoasterDevilDays$volEstimate,
+                                                  RollerCoasterDevilDays$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(RollerCoasterDevilDays$R, 7, 1 / 252),
+                                                  RollerCoasterDevilDays$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(RollerCoasterDevilDays$R, 21, 1 / 252),
+                                                  RollerCoasterDevilDays$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(RollerCoasterDevilDays$R, 63, 1 / 252),
+                                                  RollerCoasterDevilDays$vol),
+                               getComparisonStats(getRealizedVolatilitySeries(RollerCoasterDevilDays$R, 186, 1 / 252),
+                                                  RollerCoasterDevilDays$vol))
+
+row.names(rollerCoasterDevilStats) <- statsNames
+
+```
+
+## Stone Cold Classic stats
+
+```{r, fig.width=15, fig.height=5}
+data.frame(RV1W = getRealizedVolatilitySeries(StoneColdClassicHours$R, 35, 1 / (252 * 7)),
+           RV1Q = getRealizedVolatilitySeries(StoneColdClassicHours$R, 441, 1 / (252 * 7)),
+           volMCMC = StoneColdClassicHours$volEstimate,
+           vol = StoneColdClassicHours$vol,
+          time = 1:length(StoneColdClassicHours$vol)) %>% 
+  filter(time > length(StoneColdClassicHours$vol) - 3507) %>%
+  mutate(data = timeAxis) %>%
+  select(-time) %>%
+  melt(id="data") %>%
+    ggplot(., aes(x = data, y = value, colour = variable)) +
+  geom_line() + 
+  scale_color_gdocs() +
+  theme_bw() +
+  theme(legend.title=element_blank()) +
+  labs(y = "zmienność")
+```
+
+```{r}
+stoneColdClassicStats[, 2 * (1:15) - 1] %>%
+  kable("latex",
+        booktabs = T,
+        caption = "Stone Cold Classic: diff between real and estimated volatility [%]",
+         digits = 2,
+         col.names = c("MCMC", "RVH", "RVD", "RVW", "RVM",
+                       "MCMC", "RVD", "RVW", "RVM", "RVQ",
+                       "MCMC", "RVW", "RVM", "RVQ", "RV6M"))  %>%
+  add_header_above(c("", "obserwacje minutowe" = 5, "obserwacje godzinowe" = 5, "obserwacje dzienne" = 5)) %>%
+  kable_styling(font_size = 7)
+
+stoneColdClassicStats[, 2 * (1:15)] %>%
+  kable("latex",
+        booktabs = T,
+        caption = "Stone Cold Classic: relative diff between real and estimated volatility [%]",
+         digits = 2,
+         col.names = c("MCMC", "RVH", "RVD", "RVW", "RVM",
+                       "MCMC", "RVD", "RVW", "RVM", "RVQ",
+                       "MCMC", "RVW", "RVM", "RVQ", "RV6M"))  %>%
+  add_header_above(c("", "obserwacje minutowe" = 5, "obserwacje godzinowe" = 5, "obserwacje dzienne" = 5)) %>%
+  kable_styling(font_size = 7)
+```
+
+## Chillout Ride stats
+
+```{r, fig.width=15, fig.height=5}
+data.frame(RVW = getRealizedVolatilitySeries(ChilloutRideHours$R, 35, 1 / (252 * 7)),
+           RVQ = getRealizedVolatilitySeries(ChilloutRideHours$R, 441, 1 / (252 * 7)),
+           volMCMC = ChilloutRideHours$volEstimate,
+           vol = ChilloutRideHours$vol,
+          time = 1:length(ChilloutRideHours$vol)) %>% 
+  filter(time > length(ChilloutRideHours$vol) - 3507) %>%
+  mutate(data = timeAxis) %>%
+  select(-time) %>%
+  melt(id="data") %>%
+    ggplot(., aes(x = data, y = value, colour = variable)) +
+  geom_line() + 
+  scale_color_gdocs() +
+  theme_bw() +
+  theme(legend.title=element_blank()) +
+  labs(y = "zmienność")
+```
+
+```{r}
+chilloutRideStats[, 2 * (1:15) - 1] %>%
+  kable("latex",
+        booktabs = T,
+        caption = "Chillout Ride: diff between real and estimated volatility [%]",
+         digits = 2,
+         col.names = c("MCMC", "RVH", "RVD", "RVW", "RVM",
+                       "MCMC", "RVD", "RVW", "RVM", "RVQ",
+                       "MCMC", "RVW", "RVM", "RVQ", "RV6M"))  %>%
+  add_header_above(c("", "obserwacje minutowe" = 5, "obserwacje godzinowe" = 5, "obserwacje dzienne" = 5)) %>%
+  kable_styling(font_size = 7)
+
+chilloutRideStats[, 2 * (1:15)] %>%
+  kable("latex",
+        booktabs = T,
+        caption = "Chillout Ride: relative diff between real and estimated volatility [%]",
+         digits = 2,
+         col.names = c("MCMC", "RVH", "RVD", "RVW", "RVM",
+                       "MCMC", "RVD", "RVW", "RVM", "RVQ",
+                       "MCMC", "RVW", "RVM", "RVQ", "RV6M"))  %>%
+  add_header_above(c("", "obserwacje minutowe" = 5, "obserwacje godzinowe" = 5, "obserwacje dzienne" = 5)) %>%
+  kable_styling(font_size = 7)
+```
+
+## Roller Coaster Devil stats
+
+```{r, fig.width=15, fig.height=5}
+data.frame(RVW = getRealizedVolatilitySeries(RollerCoasterDevilHours$R, 35, 1 / (252 * 7)),
+           RVQ = getRealizedVolatilitySeries(RollerCoasterDevilHours$R, 441, 1 / (252 * 7)),
+           volMCMC = RollerCoasterDevilHours$volEstimate,
+           vol = RollerCoasterDevilHours$vol,
+          time = 1:length(RollerCoasterDevilHours$vol)) %>% 
+  filter(time > length(RollerCoasterDevilHours$vol) - 3507) %>%
+  mutate(data = timeAxis) %>%
+  select(-time) %>%
+  melt(id="data") %>%
+    ggplot(., aes(x = data, y = value, colour = variable)) +
+  geom_line() + 
+  scale_color_gdocs() +
+  theme_bw() +
+  theme(legend.title=element_blank()) +
+  labs(y = "zmienność")
+```
+
+```{r}
+rollerCoasterDevilStats[, 2 * (1:15) - 1] %>%
+  kable("latex",
+        booktabs = T,
+        caption = "Roller Coaster Devil: diff between real and estimated volatility [%]",
+         digits = 2,
+         col.names = c("MCMC", "RVH", "RVD", "RVW", "RVM",
+                       "MCMC", "RVD", "RVW", "RVM", "RVQ",
+                       "MCMC", "RVW", "RVM", "RVQ", "RV6M"))  %>%
+  add_header_above(c("", "obserwacje minutowe" = 5, "obserwacje godzinowe" = 5, "obserwacje dzienne" = 5)) %>%
+  kable_styling(font_size = 7)
+
+rollerCoasterDevilStats[, 2 * (1:15)] %>%
+  kable("latex",
+        booktabs = T,
+        caption = "Roller Coaster Devil: relative diff between real and estimated volatility [%]",
+         digits = 2,
+         col.names = c("MCMC", "RVH", "RVD", "RVW", "RVM",
+                       "MCMC", "RVD", "RVW", "RVM", "RVQ",
+                       "MCMC", "RVW", "RVM", "RVQ", "RV6M"))  %>%
+  add_header_above(c("", "obserwacje minutowe" = 5, "obserwacje godzinowe" = 5, "obserwacje obserwacje dzienne" = 5)) %>%
+  kable_styling(font_size = 7)
+```

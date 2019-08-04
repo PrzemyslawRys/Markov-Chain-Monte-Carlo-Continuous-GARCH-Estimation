@@ -1,8 +1,8 @@
 drawVSeriesFromPosteriorMetropolisHastingsRCPP <- function(currentV, R, alphaCurrent, betaCurrent, gammaCurrent, etaCurrent, dt, alpha_V, beta_V){
   vCurrent[1]     <-
-    drawV0FromPosterior(v[1],
+    drawV0FromPosterior(currentV[1],
                         R[1],
-                        v[2],
+                        currentV[2],
                         alphaCurrent,
                         betaCurrent,
                         gammaCurrent,
@@ -11,7 +11,7 @@ drawVSeriesFromPosteriorMetropolisHastingsRCPP <- function(currentV, R, alphaCur
                         alpha_V,
                         beta_V)
   startTime <- Sys.time()
-  vCurrent <- drawViSeriesFromPosteriorMetropolisHastingsRCPP(vCurrent,
+  vCurrent <- drawViSeriesFromPosteriorMetropolisHastingsRCPP(currentV,
                                                               R,
                                                               alphaSeries[i],
                                                               betaSeries[i],
