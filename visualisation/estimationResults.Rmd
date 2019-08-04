@@ -1,6 +1,6 @@
 ---
 title: "estimationResults"
-output: html_document
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
@@ -16,6 +16,7 @@ library(kableExtra)
 
 source("../src/fun-getEstimatorsFromResults.R")
 source("../src/fun-getStandardEstimators.R")
+source("../src/fun-getRealizedVarianceSeries.R")
 source("../src/fun-getHistoricalVarianceSeries.R")
 source("../src/fun-getModelParameters.R")
 source("../src/fun-getSchemeParameters.R")
@@ -37,8 +38,6 @@ RollerCoasterDevilHours <- readRDS("../results/RollerCoasterDevilHours.Rds")
 RollerCoasterDevilDays  <- readRDS("../results/RollerCoasterDevilDays.Rds")
 ```
 
-# Stone Cold Classic case
-
 ```{r}
 stoneColdSchemeParametersMin  <- getSchemeParameters(0.1,2,0.15,0.3,1 / (252 * 405))
 stoneColdParamsMin            <- c(stoneColdSchemeParametersMin[,1:3] %>% as.numeric(), 0.3, 0.1, 2, 0.15)
@@ -47,277 +46,237 @@ stoneColdParamsHour           <- c(stoneColdSchemeParametersHour[,1:3] %>% as.nu
 stoneColdSchemeParametersDay  <- getSchemeParameters(0.1,2,0.15,0.3,1 / (252))
 stoneColdParamsDay            <- c(stoneColdSchemeParametersDay[,1:3] %>% as.numeric(), 0.3, 0.1, 2, 0.15)
 
-stoneColdClassicEstimatorsMins <- bind_cols(params = stoneColdParamsMin,
-                                            MCMC = getEstimatorsFromResults(StoneColdClassicMins, 1 / (252 * 405)),
-                                            RVhourly =
-                                              getStandardEstimators(getHistoricalVarianceSeries(StoneColdClassicMins$R, 60, 1 / (252 * 405)),
-                                                                    StoneColdClassicMins$R,
-                                                                    1 / (252 * 405)),
-                                            RVdaily =
-                                              getStandardEstimators(getHistoricalVarianceSeries(StoneColdClassicMins$R, 405, 1 / (252 * 405)),
-                                                                    StoneColdClassicMins$R,
-                                                                    1 / (252 * 405)),
-                                            RVweekly =
-                                              getStandardEstimators(getHistoricalVarianceSeries(StoneColdClassicMins$R, 2025, 1 / (252 * 405)),
-                                                                    StoneColdClassicMins$R,
-                                                                    1 / (252 * 405)),
-                                            RVmonthly =
-                                              getStandardEstimators(getHistoricalVarianceSeries(StoneColdClassicMins$R, 8505, 1 / (252 * 405)),
-                                                                    StoneColdClassicMins$R,
-                                                                    1 / (252 * 405))) %>%
-  as.data.frame()
-
-stoneColdClassicEstimatorsHours <- bind_cols(params = stoneColdParamsHour,
-                                             MCMC = getEstimatorsFromResults(StoneColdClassicHours, 1 / (252 * 7)),
+stoneColdClassicEstimators <- bind_cols(params = stoneColdParamsMin,
+                                        MCMC = getEstimatorsFromResults(StoneColdClassicMins, 1 / (252 * 405)),
+                                        RVH =
+                                          getStandardEstimators(getRealizedVarianceSeries(StoneColdClassicMins$R, 60, 1 / (252 * 405)),
+                                                                StoneColdClassicMins$R,
+                                                                1 / (252 * 405)),
+                                        RVD =
+                                          getStandardEstimators(getRealizedVarianceSeries(StoneColdClassicMins$R, 405, 1 / (252 * 405)),
+                                                                StoneColdClassicMins$R,
+                                                                1 / (252 * 405)),
+                                        RVW =
+                                          getStandardEstimators(getRealizedVarianceSeries(StoneColdClassicMins$R, 2025, 1 / (252 * 405)),
+                                                                StoneColdClassicMins$R,
+                                                                1 / (252 * 405)),
+                                        RvM =
+                                          getStandardEstimators(getRealizedVarianceSeries(StoneColdClassicMins$R, 8505, 1 / (252 * 405)),
+                                                                StoneColdClassicMins$R,
+                                                                1 / (252 * 405)),
+                                        params = stoneColdParamsHour,
+                                        MCMC = getEstimatorsFromResults(StoneColdClassicHours, 1 / (252 * 7)),
                                         RVdaily =
-                                          getStandardEstimators(getHistoricalVarianceSeries(StoneColdClassicHours$R, 7, 1 / (252 * 7)),
+                                          getStandardEstimators(getRealizedVarianceSeries(StoneColdClassicHours$R, 7, 1 / (252 * 7)),
                                                                 StoneColdClassicHours$R,
                                                                 1 / (252 * 7)),
-                                        RVweekly =
-                                          getStandardEstimators(getHistoricalVarianceSeries(StoneColdClassicHours$R, 35, 1 / (252 * 7)),
+                                        RVW =
+                                          getStandardEstimators(getRealizedVarianceSeries(StoneColdClassicHours$R, 35, 1 / (252 * 7)),
                                                                 StoneColdClassicHours$R,
                                                                 1 / (252 * 7)),
-                                        RVmonthly =
-                                          getStandardEstimators(getHistoricalVarianceSeries(StoneColdClassicHours$R, 147, 1 / (252 * 7)),
+                                        RVM =
+                                          getStandardEstimators(getRealizedVarianceSeries(StoneColdClassicHours$R, 147, 1 / (252 * 7)),
                                                                 StoneColdClassicHours$R,
                                                                 1 / (252 * 7)),
-                                        RVquarterly =
-                                          getStandardEstimators(getHistoricalVarianceSeries(StoneColdClassicHours$R, 441, 1 / (252 * 7)),
+                                        RVQ =
+                                          getStandardEstimators(getRealizedVarianceSeries(StoneColdClassicHours$R, 441, 1 / (252 * 7)),
                                                                 StoneColdClassicHours$R,
-                                                                1 / (252 * 7))) %>%
-  as.data.frame()
-
-stoneColdClassicEstimatorsDays <- bind_cols(params = stoneColdParamsDay,
-                                            MCMC = getEstimatorsFromResults(StoneColdClassicDays, 1 / (252)),
-                                        RVweekly =
-                                          getStandardEstimators(getHistoricalVarianceSeries(StoneColdClassicDays$R, 7, 1 / (252)),
+                                                                1 / (252 * 7)),
+                                        params = stoneColdParamsDay,
+                                        MCMC = getEstimatorsFromResults(StoneColdClassicDays, 1 / (252)),
+                                        RVW =
+                                          getStandardEstimators(getRealizedVarianceSeries(StoneColdClassicDays$R, 7, 1 / (252)),
                                                                 StoneColdClassicDays$R,
                                                                 1 / (252)),
-                                        RVmonthly =
-                                          getStandardEstimators(getHistoricalVarianceSeries(StoneColdClassicDays$R, 21, 1 / (252)),
+                                        RVM =
+                                          getStandardEstimators(getRealizedVarianceSeries(StoneColdClassicDays$R, 21, 1 / (252)),
                                                                 StoneColdClassicDays$R,
                                                                 1 / (252)),
-                                        RVquarterly =
-                                          getStandardEstimators(getHistoricalVarianceSeries(StoneColdClassicDays$R, 63, 1 / (252)),
+                                        RVQ =
+                                          getStandardEstimators(getRealizedVarianceSeries(StoneColdClassicDays$R, 63, 1 / (252)),
                                                                 StoneColdClassicDays$R,
                                                                 1 / (252)),
-                                        RVsixmonthly =
-                                          getStandardEstimators(getHistoricalVarianceSeries(StoneColdClassicDays$R, 186, 1 / (252)),
+                                        RV6M =
+                                          getStandardEstimators(getRealizedVarianceSeries(StoneColdClassicDays$R, 186, 1 / (252)),
                                                                 StoneColdClassicDays$R,
                                                                 1 / (252)))  %>%
   as.data.frame()
 
-row.names(stoneColdClassicEstimatorsMins)  <- tableRowNames
-row.names(stoneColdClassicEstimatorsHours) <- tableRowNames
-row.names(stoneColdClassicEstimatorsDays)  <- tableRowNames
+row.names(stoneColdClassicEstimators)  <- tableRowNames
 
-
-stoneColdClassicEstimatorsMins %>%
-  kable(caption = "mins",
-        digits = 4,
-        col.names = c("params", "MCMC", "RVhourly", "RVdaily", "RVweekly", "RVmonthly")) %>%
-  kable_styling(bootstrap_options = c("striped", "hover"))
-
-stoneColdClassicEstimatorsHours %>%
-  kable(caption = "hours",
-        digits = 4,
-        col.names = c("params", "MCMC", "RVdaily", "RVweekly", "RVmonthly", "RVquarterly")) %>%
-  kable_styling(bootstrap_options = c("striped", "hover"))
-
-stoneColdClassicEstimatorsDays %>%
-  kable(caption = "days",
-        digits = 4,
-        col.names = c("params", "MCMC", "RVweekly", "RVmonthly", "RVquarterly", "RVsixmonthly")) %>%
-  kable_styling(bootstrap_options = c("striped", "hover"))
+stoneColdClassicEstimators %>%
+  kable("latex",
+        booktabs = T,
+        caption = "Stone Cold Classic: estimators, day",
+        digits = 2,
+        col.names = c("par", "MCMC", "RVH", "RVD", "RVW", "RVM",
+                      "par", "MCMC", "RVD", "RVW", "RVM", "RVQ",
+                      "par", "MCMC", "RVW", "RVM", "RVQ", "RV6M")) %>%
+  landscape(margin = NULL) %>%
+  kable_styling(font_size = 8)  %>%
+  add_header_above(c("", "obserwacje minutowe" = 6, "obserwacje godzinowe" = 6, "obserwacje dzienne" = 6))
+  
 
 ```
-
-# Chillout Ride Case
 
 ```{r}
-stoneColdSchemeParametersMin  <- getSchemeParameters(0,10,0.1,0.05,1 / (252 * 405))
-stoneColdParamsMin            <- c(stoneColdSchemeParametersMin[,1:3] %>% as.numeric(), 0.05, 0, 10, 0.1)
-stoneColdSchemeParametersHour <- getSchemeParameters(0,10,0.1,0.05,1 / (252 * 7))
-stoneColdParamsHour           <- c(stoneColdSchemeParametersHour[,1:3] %>% as.numeric(), 0.05, 0, 10, 0.1)
-stoneColdSchemeParametersDay  <- getSchemeParameters(0,10,0.1,0.05,1 / (252))
-stoneColdParamsDay            <- c(stoneColdSchemeParametersDay[,1:3] %>% as.numeric(), 0.05, 0, 10, 0.1)
+chilloutRideSchemeParametersMin  <- getSchemeParameters(0, 10, 0.1, 0.05, 1 / (252 * 405))
+chilloutRideParamsMin            <- c(chilloutRideSchemeParametersMin[,1:3] %>% as.numeric(), 0.05, 0, 10, 0.1)
+chilloutRideSchemeParametersHour <- getSchemeParameters(0, 10, 0.1, 0.05, 1 / (252 * 7))
+chilloutRideParamsHour           <- c(chilloutRideSchemeParametersHour[,1:3] %>% as.numeric(), 0.05, 0, 10, 0.1)
+chilloutRideSchemeParametersDay  <- getSchemeParameters(0, 10, 0.1, 0.05, 1 / (252))
+chilloutRideParamsDay            <- c(chilloutRideSchemeParametersDay[,1:3] %>% as.numeric(), 0.05, 0, 10, 0.1)
 
-chilloutRideEstimatorsMins <- bind_cols(params = stoneColdParamsMin,
-                                            MCMC = getEstimatorsFromResults(ChilloutRideMins, 1 / (252 * 405)),
-                                            RVhourly =
-                                              getStandardEstimators(getHistoricalVarianceSeries(ChilloutRideMins$R, 60, 1 / (252 * 405)),
-                                                                    ChilloutRideMins$R,
-                                                                    1 / (252 * 405)),
-                                            RVdaily =
-                                              getStandardEstimators(getHistoricalVarianceSeries(ChilloutRideMins$R, 405, 1 / (252 * 405)),
-                                                                    ChilloutRideMins$R,
-                                                                    1 / (252 * 405)),
-                                            RVweekly =
-                                              getStandardEstimators(getHistoricalVarianceSeries(ChilloutRideMins$R, 2025, 1 / (252 * 405)),
-                                                                    ChilloutRideMins$R,
-                                                                    1 / (252 * 405)),
-                                            RVmonthly =
-                                              getStandardEstimators(getHistoricalVarianceSeries(ChilloutRideMins$R, 8505, 1 / (252 * 405)),
-                                                                    ChilloutRideMins$R,
-                                                                    1 / (252 * 405))) %>%
-  as.data.frame()
-
-chilloutRideEstimatorsHours <- bind_cols(params = stoneColdParamsHour,
-                                             MCMC = getEstimatorsFromResults(ChilloutRideHours, 1 / (252 * 7)),
+chilloutRideEstimators <- bind_cols(params = chilloutRideParamsMin,
+                                        MCMC = getEstimatorsFromResults(ChilloutRideMins, 1 / (252 * 405)),
+                                        RVH =
+                                          getStandardEstimators(getRealizedVarianceSeries(ChilloutRideMins$R, 60, 1 / (252 * 405)),
+                                                                ChilloutRideMins$R,
+                                                                1 / (252 * 405)),
+                                        RVD =
+                                          getStandardEstimators(getRealizedVarianceSeries(ChilloutRideMins$R, 405, 1 / (252 * 405)),
+                                                                ChilloutRideMins$R,
+                                                                1 / (252 * 405)),
+                                        RVW =
+                                          getStandardEstimators(getRealizedVarianceSeries(ChilloutRideMins$R, 2025, 1 / (252 * 405)),
+                                                                ChilloutRideMins$R,
+                                                                1 / (252 * 405)),
+                                        RvM =
+                                          getStandardEstimators(getRealizedVarianceSeries(ChilloutRideMins$R, 8505, 1 / (252 * 405)),
+                                                                ChilloutRideMins$R,
+                                                                1 / (252 * 405)),
+                                        params = chilloutRideParamsHour,
+                                        MCMC = getEstimatorsFromResults(ChilloutRideHours, 1 / (252 * 7)),
                                         RVdaily =
-                                          getStandardEstimators(getHistoricalVarianceSeries(ChilloutRideHours$R, 7, 1 / (252 * 7)),
+                                          getStandardEstimators(getRealizedVarianceSeries(ChilloutRideHours$R, 7, 1 / (252 * 7)),
                                                                 ChilloutRideHours$R,
                                                                 1 / (252 * 7)),
-                                        RVweekly =
-                                          getStandardEstimators(getHistoricalVarianceSeries(ChilloutRideHours$R, 35, 1 / (252 * 7)),
+                                        RVW =
+                                          getStandardEstimators(getRealizedVarianceSeries(ChilloutRideHours$R, 35, 1 / (252 * 7)),
                                                                 ChilloutRideHours$R,
                                                                 1 / (252 * 7)),
-                                        RVmonthly =
-                                          getStandardEstimators(getHistoricalVarianceSeries(ChilloutRideHours$R, 147, 1 / (252 * 7)),
+                                        RVM =
+                                          getStandardEstimators(getRealizedVarianceSeries(ChilloutRideHours$R, 147, 1 / (252 * 7)),
                                                                 ChilloutRideHours$R,
                                                                 1 / (252 * 7)),
-                                        RVquarterly =
-                                          getStandardEstimators(getHistoricalVarianceSeries(ChilloutRideHours$R, 441, 1 / (252 * 7)),
+                                        RVQ =
+                                          getStandardEstimators(getRealizedVarianceSeries(ChilloutRideHours$R, 441, 1 / (252 * 7)),
                                                                 ChilloutRideHours$R,
-                                                                1 / (252 * 7))) %>%
-  as.data.frame()
-
-chilloutRideEstimatorsDays <- bind_cols(params = stoneColdParamsDay,
-                                            MCMC = getEstimatorsFromResults(ChilloutRideDays, 1 / (252)),
-                                        RVweekly =
-                                          getStandardEstimators(getHistoricalVarianceSeries(ChilloutRideDays$R, 7, 1 / (252)),
+                                                                1 / (252 * 7)),
+                                        params = chilloutRideParamsDay,
+                                        MCMC = getEstimatorsFromResults(ChilloutRideDays, 1 / (252)),
+                                        RVW =
+                                          getStandardEstimators(getRealizedVarianceSeries(ChilloutRideDays$R, 7, 1 / (252)),
                                                                 ChilloutRideDays$R,
                                                                 1 / (252)),
-                                        RVmonthly =
-                                          getStandardEstimators(getHistoricalVarianceSeries(ChilloutRideDays$R, 21, 1 / (252)),
+                                        RVM =
+                                          getStandardEstimators(getRealizedVarianceSeries(ChilloutRideDays$R, 21, 1 / (252)),
                                                                 ChilloutRideDays$R,
                                                                 1 / (252)),
-                                        RVquarterly =
-                                          getStandardEstimators(getHistoricalVarianceSeries(ChilloutRideDays$R, 63, 1 / (252)),
+                                        RVQ =
+                                          getStandardEstimators(getRealizedVarianceSeries(ChilloutRideDays$R, 63, 1 / (252)),
                                                                 ChilloutRideDays$R,
                                                                 1 / (252)),
-                                        RVsixmonthly =
-                                          getStandardEstimators(getHistoricalVarianceSeries(ChilloutRideDays$R, 186, 1 / (252)),
+                                        RV6M =
+                                          getStandardEstimators(getRealizedVarianceSeries(ChilloutRideDays$R, 186, 1 / (252)),
                                                                 ChilloutRideDays$R,
                                                                 1 / (252)))  %>%
   as.data.frame()
 
-row.names(chilloutRideEstimatorsMins)  <- tableRowNames
-row.names(chilloutRideEstimatorsHours) <- tableRowNames
-row.names(chilloutRideEstimatorsDays)  <- tableRowNames
+row.names(chilloutRideEstimators)  <- tableRowNames
 
+chilloutRideEstimators %>%
+  kable("latex",
+        booktabs = T,
+        caption = "Chillout Ride: estimators, day",
+        digits = 2,
+        col.names = c("par", "MCMC", "RVH", "RVD", "RVW", "RVM",
+                      "par", "MCMC", "RVD", "RVW", "RVM", "RVQ",
+                      "par", "MCMC", "RVW", "RVM", "RVQ", "RV6M")) %>%
+  landscape(margin = NULL) %>%
+  kable_styling(font_size = 8)  %>%
+  add_header_above(c("", "obserwacje minutowe" = 6, "obserwacje godzinowe" = 6, "obserwacje dzienne" = 6))
 
-chilloutRideEstimatorsMins %>%
-  kable(caption = "mins",
-        digits = 4,
-        col.names = c("params", "MCMC", "RVhourly", "RVdaily", "RVweekly", "RVmonthly")) %>%
-  kable_styling(bootstrap_options = c("striped", "hover"))
-
-chilloutRideEstimatorsHours %>%
-  kable(caption = "hours",
-        digits = 4,
-        col.names = c("params", "MCMC", "RVdaily", "RVweekly", "RVmonthly", "RVquarterly")) %>%
-  kable_styling(bootstrap_options = c("striped", "hover"))
-
-chilloutRideEstimatorsDays %>%
-  kable(caption = "days",
-        digits = 4,
-        col.names = c("params", "MCMC", "RVweekly", "RVmonthly", "RVquarterly", "RVsixmonthly")) %>%
-  kable_styling(bootstrap_options = c("striped", "hover"))
 
 ```
-
-# Roller Coaster Devil
 
 ```{r}
-stoneColdSchemeParametersMin  <- getSchemeParameters(-0.2,0.5,0.40,2,1 / (252 * 405))
-stoneColdParamsMin            <- c(stoneColdSchemeParametersMin[,1:3] %>% as.numeric(), 2, -0.2, 0.5, 0.40)
-stoneColdSchemeParametersHour <- getSchemeParameters(-0.2,0.5,0.40,2,1 / (252 * 7))
-stoneColdParamsHour           <- c(stoneColdSchemeParametersHour[,1:3] %>% as.numeric(), 2, -0.2, 0.5, 0.40)
-stoneColdSchemeParametersDay  <- getSchemeParameters(-0.2,0.5,0.40,2,1 / (252))
-stoneColdParamsDay            <- c(stoneColdSchemeParametersDay[,1:3] %>% as.numeric(), 2, -0.2, 0.5, 0.40)
+rollerCoasterDevilSchemeParametersMin  <- getSchemeParameters(-0.2, 0.5, 0.4, 2, 1 / (252 * 405))
+rollerCoasterDevilParamsMin            <- c(rollerCoasterDevilSchemeParametersMin[,1:3] %>% as.numeric(), 2, -0.2, 0.5, 0.4)
+rollerCoasterDevilSchemeParametersHour <- getSchemeParameters(-0.2, 0.5, 0.4, 2, 1 / (252 * 7))
+rollerCoasterDevilParamsHour           <- c(rollerCoasterDevilSchemeParametersHour[,1:3] %>% as.numeric(), 2, -0.2, 0.5, 0.4)
+rollerCoasterDevilSchemeParametersDay  <- getSchemeParameters(-0.2, 0.5, 0.4, 2, 1 / (252))
+rollerCoasterDevilParamsDay            <- c(rollerCoasterDevilSchemeParametersDay[,1:3] %>% as.numeric(), 2, -0.2, 0.5, 0.4)
 
-rollerCoasterDevilEstimatorsMins <- bind_cols(params = stoneColdParamsMin,
-                                            MCMC = getEstimatorsFromResults(RollerCoasterDevilMins, 1 / (252 * 405)),
-                                            RVhourly =
-                                              getStandardEstimators(getHistoricalVarianceSeries(RollerCoasterDevilMins$R, 60, 1 / (252 * 405)),
-                                                                    RollerCoasterDevilMins$R,
-                                                                    1 / (252 * 405)),
-                                            RVdaily =
-                                              getStandardEstimators(getHistoricalVarianceSeries(RollerCoasterDevilMins$R, 405, 1 / (252 * 405)),
-                                                                    RollerCoasterDevilMins$R,
-                                                                    1 / (252 * 405)),
-                                            RVweekly =
-                                              getStandardEstimators(getHistoricalVarianceSeries(RollerCoasterDevilMins$R, 2025, 1 / (252 * 405)),
-                                                                    RollerCoasterDevilMins$R,
-                                                                    1 / (252 * 405)),
-                                            RVmonthly =
-                                              getStandardEstimators(getHistoricalVarianceSeries(RollerCoasterDevilMins$R, 8505, 1 / (252 * 405)),
-                                                                    RollerCoasterDevilMins$R,
-                                                                    1 / (252 * 405))) %>%
-  as.data.frame()
-
-rollerCoasterDevilEstimatorsHours <- bind_cols(params = stoneColdParamsHour,
-                                             MCMC = getEstimatorsFromResults(RollerCoasterDevilHours, 1 / (252 * 7)),
+rollerCoasterDevilEstimators <- bind_cols(params = rollerCoasterDevilParamsMin,
+                                        MCMC = getEstimatorsFromResults(RollerCoasterDevilMins, 1 / (252 * 405)),
+                                        RVH =
+                                          getStandardEstimators(getRealizedVarianceSeries(RollerCoasterDevilMins$R, 60, 1 / (252 * 405)),
+                                                                RollerCoasterDevilMins$R,
+                                                                1 / (252 * 405)),
+                                        RVD =
+                                          getStandardEstimators(getRealizedVarianceSeries(RollerCoasterDevilMins$R, 405, 1 / (252 * 405)),
+                                                                RollerCoasterDevilMins$R,
+                                                                1 / (252 * 405)),
+                                        RVW =
+                                          getStandardEstimators(getRealizedVarianceSeries(RollerCoasterDevilMins$R, 2025, 1 / (252 * 405)),
+                                                                RollerCoasterDevilMins$R,
+                                                                1 / (252 * 405)),
+                                        RvM =
+                                          getStandardEstimators(getRealizedVarianceSeries(RollerCoasterDevilMins$R, 8505, 1 / (252 * 405)),
+                                                                RollerCoasterDevilMins$R,
+                                                                1 / (252 * 405)),
+                                        params = rollerCoasterDevilParamsHour,
+                                        MCMC = getEstimatorsFromResults(RollerCoasterDevilHours, 1 / (252 * 7)),
                                         RVdaily =
-                                          getStandardEstimators(getHistoricalVarianceSeries(RollerCoasterDevilHours$R, 7, 1 / (252 * 7)),
+                                          getStandardEstimators(getRealizedVarianceSeries(RollerCoasterDevilHours$R, 7, 1 / (252 * 7)),
                                                                 RollerCoasterDevilHours$R,
                                                                 1 / (252 * 7)),
-                                        RVweekly =
-                                          getStandardEstimators(getHistoricalVarianceSeries(RollerCoasterDevilHours$R, 35, 1 / (252 * 7)),
+                                        RVW =
+                                          getStandardEstimators(getRealizedVarianceSeries(RollerCoasterDevilHours$R, 35, 1 / (252 * 7)),
                                                                 RollerCoasterDevilHours$R,
                                                                 1 / (252 * 7)),
-                                        RVmonthly =
-                                          getStandardEstimators(getHistoricalVarianceSeries(RollerCoasterDevilHours$R, 147, 1 / (252 * 7)),
+                                        RVM =
+                                          getStandardEstimators(getRealizedVarianceSeries(RollerCoasterDevilHours$R, 147, 1 / (252 * 7)),
                                                                 RollerCoasterDevilHours$R,
                                                                 1 / (252 * 7)),
-                                        RVquarterly =
-                                          getStandardEstimators(getHistoricalVarianceSeries(RollerCoasterDevilHours$R, 441, 1 / (252 * 7)),
+                                        RVQ =
+                                          getStandardEstimators(getRealizedVarianceSeries(RollerCoasterDevilHours$R, 441, 1 / (252 * 7)),
                                                                 RollerCoasterDevilHours$R,
-                                                                1 / (252 * 7))) %>%
-  as.data.frame()
-
-rollerCoasterDevilEstimatorsDays <- bind_cols(params = stoneColdParamsDay,
-                                            MCMC = getEstimatorsFromResults(RollerCoasterDevilDays, 1 / (252)),
-                                        RVweekly =
-                                          getStandardEstimators(getHistoricalVarianceSeries(RollerCoasterDevilDays$R, 7, 1 / (252)),
+                                                                1 / (252 * 7)),
+                                        params = rollerCoasterDevilParamsDay,
+                                        MCMC = getEstimatorsFromResults(RollerCoasterDevilDays, 1 / (252)),
+                                        RVW =
+                                          getStandardEstimators(getRealizedVarianceSeries(RollerCoasterDevilDays$R, 7, 1 / (252)),
                                                                 RollerCoasterDevilDays$R,
                                                                 1 / (252)),
-                                        RVmonthly =
-                                          getStandardEstimators(getHistoricalVarianceSeries(RollerCoasterDevilDays$R, 21, 1 / (252)),
+                                        RVM =
+                                          getStandardEstimators(getRealizedVarianceSeries(RollerCoasterDevilDays$R, 21, 1 / (252)),
                                                                 RollerCoasterDevilDays$R,
                                                                 1 / (252)),
-                                        RVquarterly =
-                                          getStandardEstimators(getHistoricalVarianceSeries(RollerCoasterDevilDays$R, 63, 1 / (252)),
+                                        RVQ =
+                                          getStandardEstimators(getRealizedVarianceSeries(RollerCoasterDevilDays$R, 63, 1 / (252)),
                                                                 RollerCoasterDevilDays$R,
                                                                 1 / (252)),
-                                        RVsixmonthly =
-                                          getStandardEstimators(getHistoricalVarianceSeries(RollerCoasterDevilDays$R, 186, 1 / (252)),
+                                        RV6M =
+                                          getStandardEstimators(getRealizedVarianceSeries(RollerCoasterDevilDays$R, 186, 1 / (252)),
                                                                 RollerCoasterDevilDays$R,
                                                                 1 / (252)))  %>%
   as.data.frame()
 
-row.names(rollerCoasterDevilEstimatorsMins)  <- tableRowNames
-row.names(rollerCoasterDevilEstimatorsHours) <- tableRowNames
-row.names(rollerCoasterDevilEstimatorsDays)  <- tableRowNames
+row.names(rollerCoasterDevilEstimators)  <- tableRowNames
 
-
-rollerCoasterDevilEstimatorsMins %>%
-  kable(caption = "mins",
-        digits = 4,
-        col.names = c("params", "MCMC", "RVhourly", "RVdaily", "RVweekly", "RVmonthly")) %>%
-  kable_styling(bootstrap_options = c("striped", "hover"))
-
-rollerCoasterDevilEstimatorsHours %>%
-  kable(caption = "hours",
-        digits = 4,
-        col.names = c("params", "MCMC", "RVdaily", "RVweekly", "RVmonthly", "RVquarterly")) %>%
-  kable_styling(bootstrap_options = c("striped", "hover"))
-
-rollerCoasterDevilEstimatorsDays %>%
-  kable(caption = "days",
-        digits = 4,
-        col.names = c("params", "MCMC", "RVweekly", "RVmonthly", "RVquarterly", "RVsixmonthly")) %>%
-  kable_styling(bootstrap_options = c("striped", "hover"))
+rollerCoasterDevilEstimators %>%
+  kable("latex",
+        booktabs = T,
+        caption = "Roller Coaster Devil: estimators, day",
+        digits = 2,
+        col.names = c("par", "MCMC", "RVH", "RVD", "RVW", "RVM",
+                      "par", "MCMC", "RVD", "RVW", "RVM", "RVQ",
+                      "par", "MCMC", "RVW", "RVM", "RVQ", "RV6M")) %>%
+  landscape(margin = NULL) %>%
+  kable_styling(font_size = 8)  %>%
+  add_header_above(c("", "obserwacje minutowe" = 6, "obserwacje godzinowe" = 6, "obserwacje dzienne" = 6))
 
 ```
+
