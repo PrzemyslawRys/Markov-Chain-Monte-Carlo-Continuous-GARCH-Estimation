@@ -1,6 +1,6 @@
-price <- numeric(100000)
-for(i in 1:100000){
-  price[i] <- getCOGARCHSettlementPrice(0,1,0.8,0,0.02,1/ (252 * 405), 0.15, 100, 21 * 405, rnorm(21 * 405 * 2))
+price <- numeric(1000000)
+for(i in 1:1000000){
+  price[i] <- getCOGARCHSettlementPrice(0,1,0.8,0.02,1/ (252 * 405), 0.15, 100, 21 * 405, rnorm(21 * 405 * 2))
 }
 
 mPayoff    <- numeric(21)

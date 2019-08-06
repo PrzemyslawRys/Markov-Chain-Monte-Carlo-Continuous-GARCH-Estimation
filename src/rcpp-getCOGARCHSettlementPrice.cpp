@@ -9,7 +9,6 @@
   double getCOGARCHSettlementPrice(double alpha,
                                           double beta,
                                           double eta,
-                                          double gamma,
                                           double r,
                                           double dt,
                                           double vInitial,
@@ -22,8 +21,8 @@
     double currentVariance = vInitial;
     
     for(int i = 1; i < numberOfSteps; i++){
-      currentRate = gamma * currentVariance + sqrt(currentVariance * dt) * normalSample[i];
-      currentPrice = currentPrice * exp(currentRate + r * dt);
+      currentRate = r * dt + sqrt(currentVariance * dt) * normalSample[i];
+      currentPrice = currentPrice * exp(currentRate);
       
       currentVariance = alpha + beta * currentVariance + eta * currentVariance * sqrt(dt) * normalSample[i + numberOfSteps];  
     }
