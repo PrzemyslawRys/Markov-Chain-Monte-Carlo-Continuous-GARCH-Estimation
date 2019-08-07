@@ -17,7 +17,7 @@ SPX <- readRDS("data/SPX_min_2004-01-02-2019-06-17.Rds") %>%
   mutate(r = 4 * log(1 + LIBOR3M / 400),
          r = na.locf(r),
          rate = c(0, diff(log(mid_price))),
-         adjRate = rate * exp(-r * dt)) %>%
+         adjRate = rate -r * dt) %>%
   filter(timestamp < "2019-01-01" %>% as.POSIXct()) 
 
 saveRDS(SPX, "data/SPX_mid_rates.Rds")

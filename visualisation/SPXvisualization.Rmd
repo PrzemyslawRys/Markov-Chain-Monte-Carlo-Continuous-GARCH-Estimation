@@ -45,16 +45,16 @@ SPX_mid_rates %>%
 
 ```{r}
 stats <- matrix(NA, 3, 9)
-stats[1, ] <- getStatsSingle(SPX_mid_rates$rate * 252 * 405)
-stats[2, ] <- getStatsSingle(SPX_mid_rates$adjRate * 252 * 405)
-stats[3, ] <- getStatsSingle(SPX_mid_rates$r)
+stats[1, ] <- getStatsSingle(SPX_mid_rates$rate * 100)
+stats[2, ] <- getStatsSingle(SPX_mid_rates$adjRate * 100)
+stats[3, ] <- getStatsSingle(SPX_mid_rates$LIBOR3M / (252 * 405))
 
 stats %>%
   as.data.frame(row.names = c("stopy zwrotu", "nadwyżkowe stopy zwrotu", "LIBOR3M USD")) %>%
   kable("latex",
         booktabs = T,
-        caption = "Statystyki opisowe stóp zwrotu SPX i stopy procentowej LIBOR3M USD",
-         digits = 2,
+        caption = "Statystyki opisowe stóp zwrotu SPX i stopy procentowej LIBOR3M USD [%]",
+         digits = 7,
          col.names = statsNames)  %>%
   kable_styling(font_size = 7)
 
