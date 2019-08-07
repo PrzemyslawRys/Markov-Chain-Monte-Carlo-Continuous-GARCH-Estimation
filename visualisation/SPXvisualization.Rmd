@@ -1,5 +1,5 @@
 ---
-title: "volatility estimates"
+title: "SPX report"
 output:
   pdf_document:
     keep_tex: true
@@ -30,7 +30,7 @@ statsNames <- c("min", "Q1%", "Q5%", "śr.", "med.", "Q95%", "Q99%", "maks.", "S
 
 ```
 
-## Stone Cold Classic stats
+## S&P500
 
 ```{r, fig.width=15, fig.height=5}
 SPX_mid_rates %>%
