@@ -1,0 +1,99 @@
+---
+title: "Estimation procedure"
+output:
+  pdf_document:
+    keep_tex: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache = FALSE)
+options(scipen = 999999)
+
+library(dplyr)
+library(TTR)
+library(Rcpp)
+library(knitr)
+library(kableExtra)
+library(ggplot2)
+library(reshape2)
+library(ggthemes)
+library(gtable)
+library(gridExtra)
+
+source("../src/fun-getStats.R")
+source("../src/fun-getStatsSingle.R")
+source("../src/fun-getComparisonStats.R")
+source("../src/fun-getRealizedVolatilitySeries.R")
+source("../src/fun-getRealizedVarianceSeries.R")
+burnoutLength <- 100
+```
+
+```{r read}
+statsNames <- c("min", "Q1%", "Q5%", "śr.", "med.", "Q95%", "Q99%", "maks.", "SD")
+
+StoneColdClassicMins        <- readRDS("../results/StoneColdClassicMins.Rds")
+StoneColdClassicHours       <- readRDS("../results/StoneColdClassicHours.Rds")
+StoneColdClassicDays        <- readRDS("../results/StoneColdClassicDays.Rds")
+ChilloutRideMins            <- readRDS("../results/ChilloutRideMins.Rds")
+ChilloutRideHours           <- readRDS("../results/ChilloutRideHours.Rds")
+ChilloutRideDays            <- readRDS("../results/ChilloutRideDays.Rds")
+RollerCoasterDevilMins      <- readRDS("../results/RollerCoasterDevilMins.Rds")
+RollerCoasterDevilHours     <- readRDS("../results/RollerCoasterDevilHours.Rds")
+RollerCoasterDevilDays      <- readRDS("../results/RollerCoasterDevilDays.Rds")
+
+```
+
+## Stone Cold Classic procedure
+
+```{r, fig.width=15, fig.height=5}
+# alpha
+data.frame(dzienne = StoneColdClassicDays$alphaSeries[-(1:burnoutLength)],
+           godzinowe = StoneColdClassicHours$alphaSeries[-(1:burnoutLength)],
+           minutowe = StoneColdClassicMins$alphaSeries[-(1:burnoutLength)]) %>%
+  mutate(numer = 1:(length(StoneColdClassicMins$alphaSeries) - burnoutLength)) %>%
+  melt(id="numer") %>%
+    ggplot(., aes(x = numer, y = value, colour = variable)) +
+  geom_line() + 
+  scale_color_gdocs() +
+  theme_bw() +
+  theme(legend.title = element_blank()) +
+  labs(y = "alpha") -> alphaPlot
+
+data.frame(dzienne = StoneColdClassicDays$betaSeries[-(1:burnoutLength)],
+           godzinowe = StoneColdClassicHours$betaSeries[-(1:burnoutLength)],
+           minutowe = StoneColdClassicMins$betaSeries[-(1:burnoutLength)]) %>%
+  mutate(numer = 1:(length(StoneColdClassicMins$betaSeries) - burnoutLength)) %>%
+  melt(id="numer") %>%
+    ggplot(., aes(x = numer, y = value, colour = variable)) +
+  geom_line() + 
+  scale_color_gdocs() +
+  theme_bw() +
+  theme(legend.title = element_blank()) +
+  labs(y = "beta") -> betaPlot
+
+data.frame(dzienne = StoneColdClassicDays$gammaSeries[-(1:burnoutLength)],
+           godzinowe = StoneColdClassicHours$gammaSeries[-(1:burnoutLength)],
+           minutowe = StoneColdClassicMins$gammaSeries[-(1:burnoutLength)]) %>%
+  mutate(numer = 1:(length(StoneColdClassicMins$gammaSeries) - burnoutLength)) %>%
+  melt(id="numer") %>%
+    ggplot(., aes(x = numer, y = value, colour = variable)) +
+  geom_line() + 
+  scale_color_gdocs() +
+  theme_bw() +
+  theme(legend.title = element_blank()) +
+  labs(y = "gamma") -> gammaPlot
+
+data.frame(dzienne = StoneColdClassicDays$etaSeries[-(1:burnoutLength)],
+           godzinowe = StoneColdClassicHours$etaSeries[-(1:burnoutLength)],
+           minutowe = StoneColdClassicMins$etaSeries[-(1:burnoutLength)]) %>%
+  mutate(numer = 1:(length(StoneColdClassicMins$etaSeries) - burnoutLength)) %>%
+  melt(id="numer") %>%
+    ggplot(., aes(x = numer, y = value, colour = variable)) +
+  geom_line() + 
+  scale_color_gdocs() +
+  theme_bw() +
+  theme(legend.title = element_blank()) +
+  labs(y = "eta") -> etaPlot
+
+grid.arrange(alphaPlot, betaPlot, gammaPlot, etaPlot, nrow = 2)
+```
