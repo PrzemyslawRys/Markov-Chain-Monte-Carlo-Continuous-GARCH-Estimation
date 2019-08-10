@@ -1,0 +1,81 @@
+---
+title: "SPX report"
+output:
+  pdf_document:
+    keep_tex: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache = FALSE)
+options(scipen = 999999)
+
+library(dplyr)
+library(TTR)
+library(Rcpp)
+library(knitr)
+library(kableExtra)
+library(ggplot2)
+library(reshape2)
+library(ggthemes)
+library(scales)
+
+source("../src/fun-getStats.R")
+source("../src/fun-getStatsSingle.R")
+source("../src/fun-getComparisonStats.R")
+source("../src/fun-getRealizedVolatilitySeries.R")
+source("../src/fun-getRealizedVarianceSeries.R")
+
+SPX_mid_rates <- readRDS("~/GitHub/Markov-chain-Monte-Carlo-COGARCH/data/SPX_mid_rates.Rds")
+
+statsNames <- c("min", "Q1%", "Q5%", "śr.", "med.", "Q95%", "Q99%", "maks.", "SD")
+
+```
+
+## S&P500
+
+```{r, fig.width=15, fig.height=5}
+SPX_mid_rates %>%
+  select(timestamp, mid_price) %>%
+  ggplot(., aes(x = timestamp, y = mid_price)) +
+  geom_line() + 
+  scale_color_gdocs() +
+  theme_bw() +
+  theme(legend.title=element_blank()) +
+  labs(y = "S&P500",
+       x = "czas") + 
+  scale_x_datetime(breaks = date_breaks("1 years"))
+```
+
+```{r, fig.width=15, fig.height=5}
+SPX_mid_rates %>%
+  select(timestamp, adjRate) %>%
+  filter(abs(adjRate) < 0.05) %>%
+  ggplot(., aes(x = timestamp, y = adjRate)) +
+  geom_line() + 
+  scale_color_gdocs() +
+  theme_bw() +
+  theme(legend.title=element_blank()) +
+  labs(y = "S&P500",
+       x = "czas") + 
+  scale_x_datetime(breaks = date_breaks("1 years"))
+```
+
+```{r}
+SPX_mid_rates <- SPX_mid_rates %>%
+   filter(abs(adjRate) < 0.05)
+
+stats <- matrix(NA, 3, 9)
+stats[1, ] <- getStatsSingle(SPX_mid_rates$rate * 100)
+stats[2, ] <- getStatsSingle(SPX_mid_rates$adjRate * 100)
+stats[3, ] <- getStatsSingle(SPX_mid_rates$LIBOR3M/ (252 * 405))
+
+stats %>%
+  as.data.frame(row.names = c("stopy zwrotu", "nadwyżkowe stopy zwrotu", "stopa wolna od ryzyka")) %>%
+  kable("latex",
+        booktabs = T,
+        caption = "Statystyki opisowe stóp zwrotu SPX i stopy wolnej od ryzyka [%]",
+         digits = 5,
+         col.names = statsNames)  %>%
+  kable_styling(font_size = 7)
+
+```
