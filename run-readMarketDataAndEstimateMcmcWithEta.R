@@ -22,11 +22,11 @@ r     <- 0.02
 delta <- 0
 kappa <- 10
 nu    <- 0.1
-eta   <- 0.80
+eta   <- 4.0
 
 freq  <- "mins" # mins, hours or days
 
-resultPath <- "results/SPXMins_withEta80.Rds"
+resultPath <- "results/SPXMins_withEta400.Rds"
 
 #_____________________________________
 #  0. Generate the data                     
