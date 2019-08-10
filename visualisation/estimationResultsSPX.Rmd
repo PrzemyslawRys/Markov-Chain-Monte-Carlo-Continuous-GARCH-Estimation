@@ -1,6 +1,8 @@
 ---
 title: "estimationResults"
-output: html_document
+output: 
+  pdf_document:
+    keep_tex: true
 ---
 
 ```{r setup, include=FALSE}
@@ -24,53 +26,57 @@ tableRowNames <- c("gamma", "alpha", "beta", "eta", "delta", "kappa", "nu")
 ```
 
 ```{r read}
-SPXMins_withEta40 <- readRDS("../results/spx/SPXMins_withEta40.Rds")
-SPXMins_withEta80 <- readRDS("../results/spx/SPXMins_withEta80.Rds")
-SPXMins_withEta120 <- readRDS("../results/spx/SPXMins_withEta120.Rds")
-SPXMins_withEta160 <- readRDS("../results/spx/SPXMins_withEta160.Rds")
-SPXMins_withEta200 <- readRDS("../results/spx/SPXMins_withEta200.Rds")
-SPXMins_withEta240 <- readRDS("../results/spx/SPXMins_withEta240.Rds")
-SPXMins_withEta280 <- readRDS("../results/spx/SPXMins_withEta280.Rds")
-SPXMins_withEta320 <- readRDS("../results/spx/SPXMins_withEta320.Rds")
-SPXMins_withEta360 <- readRDS("../results/spx/SPXMins_withEta360.Rds")
-SPXMins_withEta400 <- readRDS("../results/spx/SPXMins_withEta400.Rds")
+SPXMins_withEta40 <- readRDS("../results/SPXMins_withEta40.Rds")
+SPXMins_withEta80 <- readRDS("../results/SPXMins_withEta80.Rds")
+SPXMins_withEta120 <- readRDS("../results/SPXMins_withEta120.Rds")
+SPXMins_withEta160 <- readRDS("../results/SPXMins_withEta160.Rds")
+SPXMins_withEta200 <- readRDS("../results/SPXMins_withEta200.Rds")
+SPXMins_withEta240 <- readRDS("../results/SPXMins_withEta240.Rds")
+SPXMins_withEta280 <- readRDS("../results/SPXMins_withEta280.Rds")
+SPXMins_withEta320 <- readRDS("../results/SPXMins_withEta320.Rds")
+SPXMins_withEta360 <- readRDS("../results/SPXMins_withEta360.Rds")
+SPXMins_withEta400 <- readRDS("../results/SPXMins_withEta400.Rds")
 ```
 
 ```{r}
-estimators <- bind_cols(
-  SPX40 = getEstimatorsFromResults(SPXMins_withEta40, 1 / (252 * 405)),
-  SPX80 = getEstimatorsFromResults(SPXMins_withEta80, 1 / (252 * 405)),
-  SPX120 = getEstimatorsFromResults(SPXMins_withEta120, 1 / (252 * 405)),
-  SPX160 = getEstimatorsFromResults(SPXMins_withEta160, 1 / (252 * 405)),
-  SPX200 = getEstimatorsFromResults(SPXMins_withEta200, 1 / (252 * 405)),
-  SPX240 = getEstimatorsFromResults(SPXMins_withEta240, 1 / (252 * 405)),
-  SPX280 = getEstimatorsFromResults(SPXMins_withEta280, 1 / (252 * 405)),
-  SPX320 = getEstimatorsFromResults(SPXMins_withEta320, 1 / (252 * 405)),
-  SPX360 = getEstimatorsFromResults(SPXMins_withEta360, 1 / (252 * 405)),
-  SPX400 = getEstimatorsFromResults(SPXMins_withEta400, 1 / (252 * 405)),
-  RVH =                                         getStandardEstimators(getRealizedVarianceSeries(SPXMins_withEta40$R, 60, 1 / (252 * 405)),
-                                                                SPXMins_withEta40$R,
-                                                                1 / (252 * 405)),
-                                        RVD =
-                                          getStandardEstimators(getRealizedVarianceSeries(SPXMins_withEta40$R, 405, 1 / (252 * 405)),
-                                                                SPXMins_withEta40$R,
-                                                                1 / (252 * 405)),
-                                        RVW =
-                                          getStandardEstimators(getRealizedVarianceSeries(SPXMins_withEta40$R, 2025, 1 / (252 * 405)),
-                                                                SPXMins_withEta40$R,
-                                                                1 / (252 * 405)),
-                                        RvM =
-                                          getStandardEstimators(getRealizedVarianceSeries(SPXMins_withEta40$R, 8505, 1 / (252 * 405)),
-                                                                SPXMins_withEta40$R,
-                                                                1 / (252 * 405))) %>%
+estimators <- bind_cols(SPX40 = getEstimatorsFromResults(SPXMins_withEta40, 1 / (252 * 405)),
+                        SPX80 = getEstimatorsFromResults(SPXMins_withEta80, 1 / (252 * 405)),
+                        SPX120 = getEstimatorsFromResults(SPXMins_withEta120, 1 / (252 * 405)),
+                        SPX160 = getEstimatorsFromResults(SPXMins_withEta160, 1 / (252 * 405)),
+                        SPX200 = getEstimatorsFromResults(SPXMins_withEta200, 1 / (252 * 405)),
+                        SPX240 = getEstimatorsFromResults(SPXMins_withEta240, 1 / (252 * 405)),
+                        SPX280 = getEstimatorsFromResults(SPXMins_withEta280, 1 / (252 * 405)),
+                        SPX320 = getEstimatorsFromResults(SPXMins_withEta320, 1 / (252 * 405)),
+                        SPX360 = getEstimatorsFromResults(SPXMins_withEta360, 1 / (252 * 405)),
+                        SPX400 = getEstimatorsFromResults(SPXMins_withEta400, 1 / (252 * 405))) %>%
   as.data.frame()
 
-row.names(estimators)  <- tableRowNames
+estimatorsRV <- bind_cols(RVH = getStandardEstimators(getRealizedVarianceSeries(SPXMins_withEta40$R, 60, 1 / (252 * 405)),
+                                                      SPXMins_withEta40$R,
+                                                      1 / (252 * 405)),
+                          RVD = getStandardEstimators(getRealizedVarianceSeries(SPXMins_withEta40$R, 405, 1 / (252 * 405)),
+                                                  SPXMins_withEta40$R,
+                                                  1 / (252 * 405)),
+                          RVW = getStandardEstimators(getRealizedVarianceSeries(SPXMins_withEta40$R, 2025, 1 / (252 * 405)),
+                                                  SPXMins_withEta40$R,
+                                                  1 / (252 * 405)),
+                          RvM = getStandardEstimators(getRealizedVarianceSeries(SPXMins_withEta40$R, 8505, 1 / (252 * 405)),
+                                                  SPXMins_withEta40$R,
+                                                  1 / (252 * 405))) %>%
+  as.data.frame()
+
+row.names(estimators)   <- tableRowNames
+row.names(estimatorsRV) <- tableRowNames
 
 estimators %>%
-  kable(caption = "Stone Cold Classic: estimators, day",
-        digits = 4)
-  
-  
+  kable(caption = "SPX Estimators",
+        col.names = c("40", "80", "120", "60", "200",
+                      "240", "280", "320", "360", "400"),
+        digits = 3)
+
+estimatorsRV %>%
+  kable(caption = "SPX Estimators",
+        col.names = c("RVH", "RVD", "RVW", "RVM"),
+        digits = 3)
 
 ```

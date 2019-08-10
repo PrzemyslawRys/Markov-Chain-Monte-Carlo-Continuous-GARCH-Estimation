@@ -17,6 +17,7 @@ library(kableExtra)
 library(ggplot2)
 library(reshape2)
 library(ggthemes)
+library(scales)
 
 source("../src/fun-getStats.R")
 source("../src/fun-getStatsSingle.R")
@@ -40,21 +41,40 @@ SPX_mid_rates %>%
   scale_color_gdocs() +
   theme_bw() +
   theme(legend.title=element_blank()) +
-  labs(y = "SPX")
+  labs(y = "S&P500",
+       x = "czas") + 
+  scale_x_datetime(breaks = date_breaks("1 years"))
+```
+
+```{r, fig.width=15, fig.height=5}
+SPX_mid_rates %>%
+  select(timestamp, adjRate) %>%
+  filter(abs(adjRate) < 0.05) %>%
+  ggplot(., aes(x = timestamp, y = adjRate)) +
+  geom_line() + 
+  scale_color_gdocs() +
+  theme_bw() +
+  theme(legend.title=element_blank()) +
+  labs(y = "S&P500",
+       x = "czas") + 
+  scale_x_datetime(breaks = date_breaks("1 years"))
 ```
 
 ```{r}
+SPX_mid_rates <- SPX_mid_rates %>%
+   filter(abs(adjRate) < 0.05)
+
 stats <- matrix(NA, 3, 9)
 stats[1, ] <- getStatsSingle(SPX_mid_rates$rate * 100)
 stats[2, ] <- getStatsSingle(SPX_mid_rates$adjRate * 100)
-stats[3, ] <- getStatsSingle(SPX_mid_rates$LIBOR3M / (252 * 405))
+stats[3, ] <- getStatsSingle(SPX_mid_rates$LIBOR3M/ (252 * 405))
 
 stats %>%
-  as.data.frame(row.names = c("stopy zwrotu", "nadwyżkowe stopy zwrotu", "LIBOR3M USD")) %>%
+  as.data.frame(row.names = c("stopy zwrotu", "nadwyżkowe stopy zwrotu", "stopa wolna od ryzyka")) %>%
   kable("latex",
         booktabs = T,
-        caption = "Statystyki opisowe stóp zwrotu SPX i stopy procentowej LIBOR3M USD [%]",
-         digits = 7,
+        caption = "Statystyki opisowe stóp zwrotu SPX i stopy wolnej od ryzyka [%]",
+         digits = 5,
          col.names = statsNames)  %>%
   kable_styling(font_size = 7)
 

@@ -31,15 +31,15 @@ burnoutLength <- 100
 ```{r read}
 statsNames <- c("min", "Q1%", "Q5%", "śr.", "med.", "Q95%", "Q99%", "maks.", "SD")
 
-StoneColdClassicMins        <- readRDS("../results/StoneColdClassicMins.Rds")
-StoneColdClassicHours       <- readRDS("../results/StoneColdClassicHours.Rds")
-StoneColdClassicDays        <- readRDS("../results/StoneColdClassicDays.Rds")
-ChilloutRideMins            <- readRDS("../results/ChilloutRideMins.Rds")
-ChilloutRideHours           <- readRDS("../results/ChilloutRideHours.Rds")
-ChilloutRideDays            <- readRDS("../results/ChilloutRideDays.Rds")
-RollerCoasterDevilMins      <- readRDS("../results/RollerCoasterDevilMins.Rds")
-RollerCoasterDevilHours     <- readRDS("../results/RollerCoasterDevilHours.Rds")
-RollerCoasterDevilDays      <- readRDS("../results/RollerCoasterDevilDays.Rds")
+StoneColdClassicMins        <- readRDS("../results/StoneColdClassicMins_withEta.Rds")
+StoneColdClassicHours       <- readRDS("../results/StoneColdClassicHours_withEta.Rds")
+StoneColdClassicDays        <- readRDS("../results/StoneColdClassicDays_withEta.Rds")
+ChilloutRideMins            <- readRDS("../results/ChilloutRideMins_withEta.Rds")
+ChilloutRideHours           <- readRDS("../results/ChilloutRideHours_withEta.Rds")
+ChilloutRideDays            <- readRDS("../results/ChilloutRideDays_withEta.Rds")
+RollerCoasterDevilMins      <- readRDS("../results/RollerCoasterDevilMins_withEta.Rds")
+RollerCoasterDevilHours     <- readRDS("../results/RollerCoasterDevilHours_withEta.Rds")
+RollerCoasterDevilDays      <- readRDS("../results/RollerCoasterDevilDays_withEta.Rds")
 
 ```
 

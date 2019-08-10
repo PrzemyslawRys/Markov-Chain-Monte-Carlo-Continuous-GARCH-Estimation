@@ -173,8 +173,8 @@ row.names(rollerCoasterDevilStats) <- statsNames
 ## Stone Cold Classic stats
 
 ```{r, fig.width=15, fig.height=5}
-data.frame(RV1W = getRealizedVolatilitySeries(StoneColdClassicHours$R, 35, 1 / (252 * 7)),
-           RV1Q = getRealizedVolatilitySeries(StoneColdClassicHours$R, 441, 1 / (252 * 7)),
+data.frame(RVW = getRealizedVolatilitySeries(StoneColdClassicHours$R, 35, 1 / (252 * 7)),
+           RVQ = getRealizedVolatilitySeries(StoneColdClassicHours$R, 441, 1 / (252 * 7)),
            volMCMC = StoneColdClassicHours$volEstimate,
            vol = StoneColdClassicHours$vol,
           time = 1:length(StoneColdClassicHours$vol)) %>% 
@@ -231,7 +231,7 @@ data.frame(RVW = getRealizedVolatilitySeries(ChilloutRideHours$R, 35, 1 / (252 *
   scale_color_gdocs() +
   theme_bw() +
   theme(legend.title=element_blank()) +
-  labs(y = "zmienność")
+  labs(y = "zmiennoÅÄ")
 ```
 
 ```{r}
@@ -275,7 +275,7 @@ data.frame(RVW = getRealizedVolatilitySeries(RollerCoasterDevilHours$R, 35, 1 / 
   scale_color_gdocs() +
   theme_bw() +
   theme(legend.title=element_blank()) +
-  labs(y = "zmienność")
+  labs(y = "zmiennoÅÄ")
 ```
 
 ```{r}
