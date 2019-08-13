@@ -26,7 +26,7 @@ eta   <- 0.80
 
 freq  <- "mins" # mins, hours or days
 
-resultPath <- "results/test.Rds"
+resultPath <- "results/RollerCoasterDevilDays_withEta.Rds"
 
 #_____________________________________
 #  0. Generate the data                     

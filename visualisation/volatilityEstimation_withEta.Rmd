@@ -30,39 +30,39 @@ source("../src/fun-getRealizedVarianceSeries.R")
 timeAxis   <- readRDS("../data/2Ytimeaxis.Rds")
 statsNames <- c("min", "Q1%", "Q5%", "sr.", "med.", "Q95%", "Q99%", "maks.", "SD")
 
-StoneColdClassicMins             <- readRDS("../results/StoneColdClassicMins.Rds")
+StoneColdClassicMins             <- readRDS("../results/StoneColdClassicMins_withEta.Rds")
 StoneColdClassicMins$vol         <- sqrt(StoneColdClassicMins$v)
 StoneColdClassicMins$volEstimate <- sqrt(StoneColdClassicMins$vEstimate)
    
-StoneColdClassicHours             <- readRDS("../results/StoneColdClassicHours.Rds")
+StoneColdClassicHours             <- readRDS("../results/StoneColdClassicHours_withEta.Rds")
 StoneColdClassicHours$vol         <- sqrt(StoneColdClassicHours$v)
 StoneColdClassicHours$volEstimate <- sqrt(StoneColdClassicHours$vEstimate)
 
-StoneColdClassicDays             <- readRDS("../results/StoneColdClassicDays.Rds")
+StoneColdClassicDays             <- readRDS("../results/StoneColdClassicDays_withEta.Rds")
 StoneColdClassicDays$vol         <- sqrt(StoneColdClassicDays$v)
 StoneColdClassicDays$volEstimate <- sqrt(StoneColdClassicDays$vEstimate)
 
-ChilloutRideMins             <- readRDS("../results/ChilloutRideMins.Rds")
+ChilloutRideMins             <- readRDS("../results/ChilloutRideMins_withEta.Rds")
 ChilloutRideMins$vol         <- sqrt(ChilloutRideMins$v)
 ChilloutRideMins$volEstimate <- sqrt(ChilloutRideMins$vEstimate)
    
-ChilloutRideHours             <- readRDS("../results/ChilloutRideHours.Rds")
+ChilloutRideHours             <- readRDS("../results/ChilloutRideHours_withEta.Rds")
 ChilloutRideHours$vol         <- sqrt(ChilloutRideHours$v)
 ChilloutRideHours$volEstimate <- sqrt(ChilloutRideHours$vEstimate)
 
-ChilloutRideDays             <- readRDS("../results/ChilloutRideDays.Rds")
+ChilloutRideDays             <- readRDS("../results/ChilloutRideDays_withEta.Rds")
 ChilloutRideDays$vol         <- sqrt(ChilloutRideDays$v)
 ChilloutRideDays$volEstimate <- sqrt(ChilloutRideDays$vEstimate)
 
-RollerCoasterDevilMins             <- readRDS("../results/RollerCoasterDevilMins.Rds")
+RollerCoasterDevilMins             <- readRDS("../results/RollerCoasterDevilMins_withEta.Rds")
 RollerCoasterDevilMins$vol         <- sqrt(RollerCoasterDevilMins$v)
 RollerCoasterDevilMins$volEstimate <- sqrt(RollerCoasterDevilMins$vEstimate)
    
-RollerCoasterDevilHours             <- readRDS("../results/RollerCoasterDevilHours.Rds")
+RollerCoasterDevilHours             <- readRDS("../results/RollerCoasterDevilHours_withEta.Rds")
 RollerCoasterDevilHours$vol         <- sqrt(RollerCoasterDevilHours$v)
 RollerCoasterDevilHours$volEstimate <- sqrt(RollerCoasterDevilHours$vEstimate)
 
-RollerCoasterDevilDays             <- readRDS("../results/RollerCoasterDevilDays.Rds")
+RollerCoasterDevilDays             <- readRDS("../results/RollerCoasterDevilDays_withEta.Rds")
 RollerCoasterDevilDays$vol         <- sqrt(RollerCoasterDevilDays$v)
 RollerCoasterDevilDays$volEstimate <- sqrt(RollerCoasterDevilDays$vEstimate)
 ```
@@ -173,11 +173,12 @@ row.names(rollerCoasterDevilStats) <- statsNames
 ## Stone Cold Classic stats
 
 ```{r, fig.width=15, fig.height=5}
-data.frame(RVW = getRealizedVolatilitySeries(StoneColdClassicHours$R, 35, 1 / (252 * 7)),
-           RVQ = getRealizedVolatilitySeries(StoneColdClassicHours$R, 441, 1 / (252 * 7)),
-           volMCMC = StoneColdClassicHours$volEstimate,
-           vol = StoneColdClassicHours$vol,
-          time = 1:length(StoneColdClassicHours$vol)) %>% 
+data.frame(RVW = getRealizedVolatilitySeries(StoneColdClassicMins$R, 405 * 5, 1 / (252 * 405)),
+           RVQ = getRealizedVolatilitySeries(StoneColdClassicMins$R, 405 * 63, 1 / (252 * 405)),
+           volMCMC = StoneColdClassicMins$volEstimate,
+           vol = StoneColdClassicMins$vol) %>% 
+  filter(row_number() %% 60 == 0) %>%
+  mutate(time = row_number()) %>%
   filter(time > length(StoneColdClassicHours$vol) - 3507) %>%
   mutate(data = timeAxis) %>%
   select(-time) %>%
@@ -187,7 +188,7 @@ data.frame(RVW = getRealizedVolatilitySeries(StoneColdClassicHours$R, 35, 1 / (2
   scale_color_gdocs() +
   theme_bw() +
   theme(legend.title=element_blank()) +
-  labs(y = "zmienność")
+  labs(y = "zmiennosc")
 ```
 
 ```{r}
@@ -217,11 +218,12 @@ stoneColdClassicStats[, 2 * (1:15)] %>%
 ## Chillout Ride stats
 
 ```{r, fig.width=15, fig.height=5}
-data.frame(RVW = getRealizedVolatilitySeries(ChilloutRideHours$R, 35, 1 / (252 * 7)),
-           RVQ = getRealizedVolatilitySeries(ChilloutRideHours$R, 441, 1 / (252 * 7)),
-           volMCMC = ChilloutRideHours$volEstimate,
-           vol = ChilloutRideHours$vol,
-          time = 1:length(ChilloutRideHours$vol)) %>% 
+data.frame(RVW = getRealizedVolatilitySeries(ChilloutRideMins$R, 405 * 5, 1 / (252 * 405)),
+           RVQ = getRealizedVolatilitySeries(ChilloutRideMins$R, 405 * 63, 1 / (252 * 405)),
+           volMCMC = ChilloutRideMins$volEstimate,
+           vol = ChilloutRideMins$vol) %>%
+  filter(row_number() %% 60 == 0) %>%
+  mutate(time = row_number()) %>%
   filter(time > length(ChilloutRideHours$vol) - 3507) %>%
   mutate(data = timeAxis) %>%
   select(-time) %>%
@@ -231,7 +233,7 @@ data.frame(RVW = getRealizedVolatilitySeries(ChilloutRideHours$R, 35, 1 / (252 *
   scale_color_gdocs() +
   theme_bw() +
   theme(legend.title=element_blank()) +
-  labs(y = "zmiennoÅÄ")
+  labs(y = "zmiennosc")
 ```
 
 ```{r}
@@ -261,11 +263,12 @@ chilloutRideStats[, 2 * (1:15)] %>%
 ## Roller Coaster Devil stats
 
 ```{r, fig.width=15, fig.height=5}
-data.frame(RVW = getRealizedVolatilitySeries(RollerCoasterDevilHours$R, 35, 1 / (252 * 7)),
-           RVQ = getRealizedVolatilitySeries(RollerCoasterDevilHours$R, 441, 1 / (252 * 7)),
-           volMCMC = RollerCoasterDevilHours$volEstimate,
-           vol = RollerCoasterDevilHours$vol,
-          time = 1:length(RollerCoasterDevilHours$vol)) %>% 
+data.frame(RVW = getRealizedVolatilitySeries(RollerCoasterDevilMins$R, 405 * 5, 1 / (252 * 405)),
+           RVQ = getRealizedVolatilitySeries(RollerCoasterDevilMins$R, 405 * 63, 1 / (252 * 405)),
+           volMCMC = RollerCoasterDevilMins$volEstimate,
+           vol = RollerCoasterDevilMins$vol) %>%
+  filter(row_number() %% 60 == 0) %>%
+  mutate(time = row_number()) %>%
   filter(time > length(RollerCoasterDevilHours$vol) - 3507) %>%
   mutate(data = timeAxis) %>%
   select(-time) %>%
@@ -275,29 +278,23 @@ data.frame(RVW = getRealizedVolatilitySeries(RollerCoasterDevilHours$R, 35, 1 / 
   scale_color_gdocs() +
   theme_bw() +
   theme(legend.title=element_blank()) +
-  labs(y = "zmiennoÅÄ")
+  labs(y = "zmiennosc")
 ```
 
 ```{r}
-rollerCoasterDevilStats[, 2 * (1:15) - 1] %>%
+rollerCoasterDevilStats[, 2 * (1:5) - 1] %>%
   kable("latex",
         booktabs = T,
         caption = "Roller Coaster Devil: diff between real and estimated volatility [%]",
          digits = 2,
-         col.names = c("MCMC", "RVH", "RVD", "RVW", "RVM",
-                       "MCMC", "RVD", "RVW", "RVM", "RVQ",
-                       "MCMC", "RVW", "RVM", "RVQ", "RV6M"))  %>%
-  add_header_above(c("", "obserwacje minutowe" = 5, "obserwacje godzinowe" = 5, "obserwacje dzienne" = 5)) %>%
+         col.names = c("MCMC", "RVH", "RVD", "RVW", "RVM"))  %>%
   kable_styling(font_size = 7)
 
-rollerCoasterDevilStats[, 2 * (1:15)] %>%
+rollerCoasterDevilStats[, 2 * (1:5)] %>%
   kable("latex",
         booktabs = T,
         caption = "Roller Coaster Devil: relative diff between real and estimated volatility [%]",
          digits = 2,
-         col.names = c("MCMC", "RVH", "RVD", "RVW", "RVM",
-                       "MCMC", "RVD", "RVW", "RVM", "RVQ",
-                       "MCMC", "RVW", "RVM", "RVQ", "RV6M"))  %>%
-  add_header_above(c("", "obserwacje minutowe" = 5, "obserwacje godzinowe" = 5, "obserwacje obserwacje dzienne" = 5)) %>%
+         col.names = c("MCMC", "RVH", "RVD", "RVW", "RVM")) %>%
   kable_styling(font_size = 7)
 ```
