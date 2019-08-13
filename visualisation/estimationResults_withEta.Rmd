@@ -268,12 +268,14 @@ rollerCoasterDevilEstimators <- bind_cols(params = rollerCoasterDevilParamsMin,
 
 row.names(rollerCoasterDevilEstimators)  <- tableRowNames
 
-rollerCoasterDevilEstimators[, 1:6] %>%
+rollerCoasterDevilEstimators %>%
   kable("latex",
         booktabs = T,
         caption = "Roller Coaster Devil: estimators, day",
         digits = 2,
-        col.names = c("par", "MCMC", "RVH", "RVD", "RVW", "RVM")) %>%
+        col.names = c("par", "MCMC", "RVH", "RVD", "RVW", "RVM",
+                      "par", "MCMC", "RVD", "RVW", "RVM", "RVQ",
+                      "par", "MCMC", "RVW", "RVM", "RVQ", "RV6M")) %>%
   landscape(margin = NULL) %>%
   kable_styling(font_size = 8)  %>%
   add_header_above(c("", "obserwacje minutowe" = 6))
