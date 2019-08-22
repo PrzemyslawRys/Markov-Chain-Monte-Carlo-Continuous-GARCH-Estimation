@@ -19,14 +19,14 @@ for(i in 1:length(funList)){
 #______________________________________
 
 r     <- 0.02
-delta <- 0
-kappa <- 10
-nu    <- 0.1
-eta   <- 0.80
+delta <- -0.2
+kappa <- 0.5
+nu    <- 0.4
+eta   <- 2.0
 
 freq  <- "mins" # mins, hours or days
 
-resultPath <- "results/RollerCoasterDevilDays_withEta.Rds"
+resultPath <- "results/RollerCoasterDevilMins_withEta.Rds"
 
 #_____________________________________
 #  0. Generate the data                     
@@ -74,7 +74,7 @@ vCurrentMAD[1] <- mean(abs(vCurrent - v))
 #  1. MCMC estimation: core
 #_____________________________________
 
-source("src/script-runMCMC.R")
+#source("src/script-runMCMC.R")
 #or :
-# source("src/script-runMCMCwithEta.R)
-# source("src/script-runMCMwithEtaWithoutV.R)
+ source("src/script-runMCMCwithEta.R")
+# source("src/script-runMCMwithEtaWithoutV.R")

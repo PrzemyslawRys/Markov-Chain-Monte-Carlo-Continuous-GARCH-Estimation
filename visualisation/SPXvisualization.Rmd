@@ -36,6 +36,7 @@ statsNames <- c("min", "Q1%", "Q5%", "śr.", "med.", "Q95%", "Q99%", "maks.", "S
 ```{r, fig.width=15, fig.height=5}
 SPX_mid_rates %>%
   select(timestamp, mid_price) %>%
+  filter(row_number() %% 60 == 0) %>%
   ggplot(., aes(x = timestamp, y = mid_price)) +
   geom_line() + 
   scale_color_gdocs() +
@@ -50,6 +51,7 @@ SPX_mid_rates %>%
 SPX_mid_rates %>%
   select(timestamp, adjRate) %>%
   filter(abs(adjRate) < 0.05) %>%
+  filter(row_number() %% 60 == 0) %>%
   ggplot(., aes(x = timestamp, y = adjRate)) +
   geom_line() + 
   scale_color_gdocs() +

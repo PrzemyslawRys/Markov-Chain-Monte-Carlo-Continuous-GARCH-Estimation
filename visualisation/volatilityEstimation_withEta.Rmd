@@ -233,7 +233,8 @@ data.frame(RVW = getRealizedVolatilitySeries(ChilloutRideMins$R, 405 * 5, 1 / (2
   scale_color_gdocs() +
   theme_bw() +
   theme(legend.title=element_blank()) +
-  labs(y = "zmiennosc")
+  labs(y = "zmiennosc") +
+  ylim(0.2, 0.4)
 ```
 
 ```{r}
@@ -282,19 +283,23 @@ data.frame(RVW = getRealizedVolatilitySeries(RollerCoasterDevilMins$R, 405 * 5, 
 ```
 
 ```{r}
-rollerCoasterDevilStats[, 2 * (1:5) - 1] %>%
+rollerCoasterDevilStats[, 2 * (1:15) - 1] %>%
   kable("latex",
         booktabs = T,
         caption = "Roller Coaster Devil: diff between real and estimated volatility [%]",
          digits = 2,
-         col.names = c("MCMC", "RVH", "RVD", "RVW", "RVM"))  %>%
+         col.names = c("MCMC", "RVH", "RVD", "RVW", "RVM",
+                       "MCMC", "RVD", "RVW", "RVM", "RVQ",
+                       "MCMC", "RVW", "RVM", "RVQ", "RV6M"))  %>%
   kable_styling(font_size = 7)
 
-rollerCoasterDevilStats[, 2 * (1:5)] %>%
+rollerCoasterDevilStats[, 2 * (1:15)] %>%
   kable("latex",
         booktabs = T,
         caption = "Roller Coaster Devil: relative diff between real and estimated volatility [%]",
          digits = 2,
-         col.names = c("MCMC", "RVH", "RVD", "RVW", "RVM")) %>%
+         col.names = c("MCMC", "RVH", "RVD", "RVW", "RVM",
+                       "MCMC", "RVD", "RVW", "RVM", "RVQ",
+                       "MCMC", "RVW", "RVM", "RVQ", "RV6M"))  %>%
   kable_styling(font_size = 7)
 ```
