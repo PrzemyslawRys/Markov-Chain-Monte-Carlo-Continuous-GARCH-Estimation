@@ -278,7 +278,7 @@ rollerCoasterDevilEstimators %>%
                       "par", "MCMC", "RVW", "RVM", "RVQ", "RV6M")) %>%
   landscape(margin = NULL) %>%
   kable_styling(font_size = 8)  %>%
-  add_header_above(c("", "obserwacje minutowe" = 6, "obserwacje godzinowe" = 6, "obserwacje dzienne" = 6))
+  add_header_above(c("", "obserwacje minutowe" = 6))
 
 ```
 

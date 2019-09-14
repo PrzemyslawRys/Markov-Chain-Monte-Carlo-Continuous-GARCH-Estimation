@@ -1,0 +1,102 @@
+---
+title: "Prices histograms"
+output:
+  pdf_document:
+    keep_tex: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache = FALSE)
+options(scipen = 999999)
+
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(ggthemes)
+library(gridExtra)
+
+```
+
+```{r read}
+price40  <- readRDS("../results/prices/price40.Rds")
+price80  <- readRDS("../results/prices/price80.Rds")
+price120 <- readRDS("../results/prices/price120.Rds")
+price160 <- readRDS("../results/prices/price160.Rds")
+price200 <- readRDS("../results/prices/price200.Rds")
+price240 <- readRDS("../results/prices/price240.Rds")
+price280 <- readRDS("../results/prices/price280.Rds")
+price320 <- readRDS("../results/prices/price320.Rds")
+price360 <- readRDS("../results/prices/price360.Rds")
+price400 <- readRDS("../results/prices/price400.Rds")
+
+SPX_mid_rates <- readRDS("../data/SPX_mid_rates.Rds")
+
+ratesBS  <- rnorm(1000000,
+                  last(SPX_mid_rates$r) * 21 / 252,
+                  sd(SPX_mid_rates$rate) * sqrt(405 * 21))
+
+priceBS  <- last(SPX_mid_rates$mid_price) * exp(ratesBS)
+
+rates40  <- log(price40) - log(last(SPX_mid_rates$mid_price))
+rates80  <- log(price80) - log(last(SPX_mid_rates$mid_price))
+rates120 <- log(price120) - log(last(SPX_mid_rates$mid_price))
+rates160 <- log(price160) - log(last(SPX_mid_rates$mid_price))
+rates200 <- log(price200) - log(last(SPX_mid_rates$mid_price))
+rates240 <- log(price240) - log(last(SPX_mid_rates$mid_price))
+rates280 <- log(price280) - log(last(SPX_mid_rates$mid_price))
+rates320 <- log(price320) - log(last(SPX_mid_rates$mid_price))
+rates360 <- log(price360) - log(last(SPX_mid_rates$mid_price))
+rates400 <- log(price400) - log(last(SPX_mid_rates$mid_price))
+```
+
+## Histograms - prices and rates
+
+```{r, fig.width=15, fig.height=5}
+data.frame(MCMC40 = price40,
+           # eta80 = price80,
+           # eta120 = price120,
+           # eta160 = price160,
+            MCMC200 = price200,
+           # eta240 = price240,
+           # eta280 = price280,
+           # eta320 = price320,
+           # eta360 = price360,
+           MCMC400 = price400,
+           BS = priceBS) %>% 
+  melt() %>%
+   filter(value < 3500 &
+         value > 1500) %>%
+    ggplot(., aes(x = value, fill = variable, colour = variable)) +
+  geom_histogram(alpha = 0.2,
+                 bins = 100,
+                 position="identity") +
+  theme_bw() +
+  theme(legend.title=element_blank()) +
+  labs(y = "częstość",
+       x = "cena końcowa") -> priceHistogram
+
+data.frame(MCMC40 = rates40,
+           # eta80 = price80,
+           # eta120 = price120,
+           # eta160 = price160,
+            MCMC200 = rates200,
+           # eta240 = price240,
+           # eta280 = price280,
+           # eta320 = price320,
+           # eta360 = price360,
+           MCMC400 = rates400,
+           BS = ratesBS) %>% 
+  melt() %>%
+    filter(value < 0.5 &
+          value > -0.5) %>%
+    ggplot(., aes(x = value, fill = variable, colour = variable)) +
+  geom_histogram(alpha = 0.2,
+                 bins = 100,
+                 position="identity") +
+  theme_bw() +
+  theme(legend.title=element_blank()) +
+  labs(y = "częstość",
+       x = "stopa zwrotu") -> rateHistogram
+
+grid.arrange(priceHistogram, rateHistogram, nrow = 1)
+```

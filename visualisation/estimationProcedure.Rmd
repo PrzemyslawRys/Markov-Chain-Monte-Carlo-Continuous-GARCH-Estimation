@@ -25,11 +25,11 @@ source("../src/fun-getStatsSingle.R")
 source("../src/fun-getComparisonStats.R")
 source("../src/fun-getRealizedVolatilitySeries.R")
 source("../src/fun-getRealizedVarianceSeries.R")
-burnoutLength <- 100
+burnoutLength <- 10
 ```
 
 ```{r read}
-statsNames <- c("min", "Q1%", "Q5%", "śr.", "med.", "Q95%", "Q99%", "maks.", "SD")
+statsNames <- c("min", "Q1%", "Q5%", "sr.", "med.", "Q95%", "Q99%", "maks.", "SD")
 
 StoneColdClassicMins        <- readRDS("../results/StoneColdClassicMins.Rds")
 StoneColdClassicHours       <- readRDS("../results/StoneColdClassicHours.Rds")

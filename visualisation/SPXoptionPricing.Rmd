@@ -1,0 +1,169 @@
+---
+title: "SPX Option Pricing"
+output:
+  pdf_document:
+    keep_tex: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, cache = FALSE)
+options(scipen = 999999)
+
+library(dplyr)
+library(TTR)
+library(Rcpp)
+library(knitr)
+library(kableExtra)
+library(ggplot2)
+library(reshape2)
+library(ggthemes)
+library(gtable)
+library(gridExtra)
+
+strikes <- seq(from = 2025, to = 2975, by = 25)
+
+impliedVol        <- readRDS("../results/impliedVolatility/impliedVol.Rds")[-c(1, 41), ]
+impliedVolCIUpper <- readRDS("../results/impliedVolatility/impliedVolCIUpper.Rds")[-c(1, 41), ]
+impliedVolCILower <- readRDS("../results/impliedVolatility/impliedVolCILower.Rds")[-c(1, 41), ]
+
+optPrice        <- readRDS("../results/optPrice.Rds")[-c(1, 41), ]
+optPriceCIUpper <- readRDS("../results/optPriceCIUpper.Rds")[-c(1, 41), ]
+optPriceCILower <- readRDS("../results/optPriceCILower.Rds")[-c(1, 41), ]
+
+blackScholesPrices <- readRDS("../results/blackScholesPrices.Rds")[-c(1, 41), ]
+
+marketOptionQuotes <- readRDS("../data/marketOptionQuotes.Rds") %>%
+  left_join(blackScholesPrices,
+            by = "strike") %>%
+  filter(!is.na(price))
+
+```
+
+## Implied Volatility
+
+```{r, fig.width=15, fig.height=5}
+
+data.frame(strike = strikes,
+           MCMC40   = impliedVol[, 1],
+           MCMC80   = impliedVol[, 2],
+           MCMC120   = impliedVol[, 3],
+           MCMC160   = impliedVol[, 4],
+           MCMC200   = impliedVol[, 5],
+           MCMC240   = impliedVol[, 6],
+           MCMC280   = impliedVol[, 7],
+           MCMC320   = impliedVol[, 8],
+           MCMC360   = impliedVol[, 9],
+           MCMC400   = impliedVol[, 10],
+           RVD       = impliedVol[, 11],
+           RVW       = impliedVol[, 12],
+           RVM       = impliedVol[, 13],
+           BS        = rep(0.1576664, 39),
+           rynek     = marketOptionQuotes %>%
+             arrange(strike) %>%
+             select(implied_vol_source) %>%
+             pull()) %>%
+  melt(id="strike") %>%
+    ggplot(., aes(x = strike, y = value, colour = variable)) +
+  geom_line() +
+  theme_bw() +
+  theme(legend.title = element_blank()) +
+  labs(y = "zmienność implikowana",
+       x = "cena wykonania") -> implVol
+
+data.frame(strike = strikes,
+           MCMC40   = impliedVol[, 1],
+           MCMC80   = impliedVol[, 2],
+           MCMC120   = impliedVol[, 3],
+           MCMC160   = impliedVol[, 4],
+           MCMC200   = impliedVol[, 5],
+           MCMC240   = impliedVol[, 6],
+           MCMC280   = impliedVol[, 7],
+           MCMC320   = impliedVol[, 8],
+           MCMC360   = impliedVol[, 9],
+           MCMC400   = impliedVol[, 10],
+           rynek     = marketOptionQuotes %>%
+             arrange(strike) %>%
+             select(implied_vol_source) %>%
+             pull()) %>%
+  melt(id="strike") %>%
+    ggplot(., aes(x = strike, y = value, colour = variable)) +
+  geom_line() + 
+  theme_bw() +
+  theme(legend.title = element_blank()) +
+  labs(y = "zmienność implikowana",
+       x = "cena wykonania") +
+  ylim(0, 0.75)-> implVol2
+
+grid.arrange(implVol, implVol2, nrow = 1)
+```
+
+## Prices
+
+```{r, fig.width=15, fig.height=5}
+
+data.frame(strike = strikes,
+           MCMC40   = optPrice[, 1],
+           MCMC80   = optPrice[, 2],
+           MCMC120   = optPrice[, 3],
+           MCMC160   = optPrice[, 4],
+           MCMC200   = optPrice[, 5],
+           MCMC240   = optPrice[, 6],
+           MCMC280   = optPrice[, 7],
+           MCMC320   = optPrice[, 8],
+           MCMC360   = optPrice[, 9],
+           MCMC400   = optPrice[, 10],
+           RVD       = optPrice[, 11],
+           RVW       = optPrice[, 12],
+           RVM       = optPrice[, 13],
+           BS        = blackScholesPrices %>%
+             select(price) %>%
+             pull(),
+           rynek     = marketOptionQuotes %>%
+             arrange(strike) %>%
+             filter(strike >= 2000 & strike <= 3000) %>%
+             select(mid_price) %>%
+             pull()) %>%
+  melt(id="strike") %>%
+    ggplot(., aes(x = strike, y = value, colour = variable)) +
+  geom_line() +
+  theme_bw() +
+  theme(legend.title = element_blank()) +
+  labs(y = "cena",
+       x = "cena wykonania") -> price
+
+data.frame(strike = strikes,
+           MCMC40   = optPrice[, 1],
+           MCMC80   = optPrice[, 2],
+           MCMC120   = optPrice[, 3],
+           MCMC160   = optPrice[, 4],
+           MCMC200   = optPrice[, 5],
+           MCMC240   = optPrice[, 6],
+           MCMC280   = optPrice[, 7],
+           MCMC320   = optPrice[, 8],
+           MCMC360   = optPrice[, 9],
+           MCMC400   = optPrice[, 10],
+           rynek     = marketOptionQuotes %>%
+             arrange(strike) %>%
+             filter(strike >= 2000 & strike <= 3000) %>%
+             select(mid_price) %>%
+             pull()) %>%
+  melt(id="strike") %>%
+    ggplot(., aes(x = strike, y = value, colour = variable)) +
+  geom_line() + 
+  theme_bw() +
+  theme(legend.title = element_blank()) +
+  labs(y = "cena",
+       x = "cena wykonania") -> price2
+
+grid.arrange(price, price2, nrow = 1)
+```
+
+## Example histogram
+
+```{r}
+price200 <- readRDS("../results/prices/price200.Rds")
+hist(log(price200 / 2509.575), breaks = 200, prob = TRUE, ylim = c(0, 10))
+lines(seq(from = -2, to = 2, by = 0.001), dnorm(seq(from = -2, to = 2, by = 0.001), mean = 0.002331519,
+                                                sd = 0.1576664 * sqrt (21 / 252)), col = "red")
+```
+
