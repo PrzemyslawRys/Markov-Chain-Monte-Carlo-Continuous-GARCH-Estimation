@@ -15,6 +15,8 @@ library(reshape2)
 library(ggthemes)
 library(gridExtra)
 library(fBasics)
+library(knitr)
+library(kableExtra)
 ```
 
 ```{r read}
@@ -28,6 +30,9 @@ price280 <- readRDS("../results/prices/price280.Rds")
 price320 <- readRDS("../results/prices/price320.Rds")
 price360 <- readRDS("../results/prices/price360.Rds")
 price400 <- readRDS("../results/prices/price400.Rds")
+priceRV405 <- readRDS("../results/prices/priceRV405.Rds")
+priceRV2025 <- readRDS("../results/prices/priceRV2025.Rds")
+priceRV8505 <- readRDS("../results/prices/priceRV8505.Rds")
 
 SPX_mid_rates <- readRDS("../data/SPX_mid_rates.Rds")
 
@@ -47,6 +52,9 @@ rates280 <- log(price280) - log(last(SPX_mid_rates$mid_price))
 rates320 <- log(price320) - log(last(SPX_mid_rates$mid_price))
 rates360 <- log(price360) - log(last(SPX_mid_rates$mid_price))
 rates400 <- log(price400) - log(last(SPX_mid_rates$mid_price))
+ratesRV405 <- log(priceRV405) - log(last(SPX_mid_rates$mid_price)) 
+ratesRV2025 <- log(priceRV2025) - log(last(SPX_mid_rates$mid_price)) 
+ratesRV8505 <- log(priceRV8505) - log(last(SPX_mid_rates$mid_price)) 
 ```
 
 ## Histograms - prices and rates
@@ -64,8 +72,6 @@ data.frame(MCMC40 = price40,
            MCMC400 = price400,
            BS = priceBS) %>% 
   melt() %>%
-   filter(value < 3500 &
-         value > 1500) %>%
     ggplot(., aes(x = value, fill = variable, colour = variable)) +
   geom_histogram(alpha = 0.2,
                  bins = 100,
@@ -75,20 +81,21 @@ data.frame(MCMC40 = price40,
   labs(y = "częstość",
        x = "cena końcowa") -> priceHistogram
 
-data.frame(MCMC40 = rates40,
+data.frame(#MCMC40 = rates40,
            # eta80 = price80,
            # eta120 = price120,
            # eta160 = price160,
-            MCMC200 = rates200,
+            #MCMC200 = rates200,
            # eta240 = price240,
            # eta280 = price280,
            # eta320 = price320,
            # eta360 = price360,
+           RV405 = ratesRV405,
+           RV2025 = ratesRV2025,
+           RV8505 = ratesRV8505,
            MCMC400 = rates400,
            BS = ratesBS) %>% 
   melt() %>%
-    filter(value < 0.5 &
-          value > -0.5) %>%
     ggplot(., aes(x = value, fill = variable, colour = variable)) +
   geom_histogram(alpha = 0.2,
                  bins = 100,
@@ -105,13 +112,30 @@ grid.arrange(priceHistogram, rateHistogram, nrow = 1)
 ## Rates statistics
 
 ```{r}
-bind_cols(MCMC40 ) %>%
+rateStats <- bind_cols(BS      = basicStats(ratesBS * 100),
+                       MCMC40 = basicStats(rates40 * 100),
+                       MCMC80 = basicStats(rates80 * 100),
+                       MCMC120 = basicStats(rates120 * 100),
+                       MCMC160 = basicStats(rates160 * 100),
+                       MCMC200 = basicStats(rates200 * 100),
+                       MCMC240 = basicStats(rates240 * 100),
+                       MCMC280 = basicStats(rates280 * 100),
+                       MCMC320 = basicStats(rates320 * 100),
+                       MCMC360 = basicStats(rates360 * 100),
+                       MCMC400 = basicStats(rates400 * 100),
+                       RVD     = basicStats(ratesRV405 * 100),
+                       RVW     = basicStats(ratesRV2025 * 100),
+                       RVM     = basicStats(ratesRV8505 * 100))
+
+row.names(rateStats) <- c("nobs", "NAs", "min", "maks", "Q25%", "Q75%", "śr.", "med.", "suma", "SE mean", "LCL", "UCL", "wariancja", "SD", "skośność", "kurtoza" )
+
+rateStats[c(3, 4, 5, 6, 7, 8, 14, 15, 16), ] %>%
   kable("latex",
         booktabs = T,
-        caption = "Chillout Ride: estimators, day",
-        digits = 2,
-        col.names = c("par", "MCMC", "RVH", "RVD", "RVW", "RVM",
-                      "par", "MCMC", "RVD", "RVW", "RVM", "RVQ",
-                      "par", "MCMC", "RVW", "RVM", "RVQ", "RV6M"))
+        caption = "Rate statistics",
+        col.names = c("BS", paste0(seq(40, 400, 40), "%"),
+                      "RVD", "RVW", "RVM"),
+        digits = 3) %>%
+  add_header_above(c(" " = 2, "algorytm MCMC" = 10, "estymacja ze zmienności zrealizowanej" = 3))
 ```
 

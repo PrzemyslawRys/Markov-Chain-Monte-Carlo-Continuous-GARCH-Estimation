@@ -14,6 +14,7 @@ library(TTR)
 library(Rcpp)
 library(knitr)
 library(kableExtra)
+library(fBasics)
 
 source("../src/fun-getEstimatorsFromResults.R")
 source("../src/fun-getStandardEstimators.R")
@@ -36,6 +37,8 @@ SPXMins_withEta280 <- readRDS("../results/SPXMins_withEta280.Rds")
 SPXMins_withEta320 <- readRDS("../results/SPXMins_withEta320.Rds")
 SPXMins_withEta360 <- readRDS("../results/SPXMins_withEta360.Rds")
 SPXMins_withEta400 <- readRDS("../results/SPXMins_withEta400.Rds")
+
+SPXMin <- readRDS("../data/SPX_min_fixed.Rds")
 ```
 
 ```{r}
@@ -51,17 +54,17 @@ estimators <- bind_cols(SPX40 = getEstimatorsFromResults(SPXMins_withEta40, 1 / 
                         SPX400 = getEstimatorsFromResults(SPXMins_withEta400, 1 / (252 * 405))) %>%
   as.data.frame()
 
-estimatorsRV <- bind_cols(RVH = getStandardEstimators(getRealizedVarianceSeries(SPXMins_withEta40$R, 60, 1 / (252 * 405)),
-                                                      SPXMins_withEta40$R,
+estimatorsRV <- bind_cols(RVH = getStandardEstimators(getRealizedVarianceSeries(SPXMin$adjRate, 60, 1 / (252 * 405)),
+                                                      SPXMin$adjRate,
                                                       1 / (252 * 405)),
-                          RVD = getStandardEstimators(getRealizedVarianceSeries(SPXMins_withEta40$R, 405, 1 / (252 * 405)),
-                                                  SPXMins_withEta40$R,
+                          RVD = getStandardEstimators(getRealizedVarianceSeries(SPXMin$adjRate, 405, 1 / (252 * 405)),
+                                                  SPXMin$adjRate,
                                                   1 / (252 * 405)),
-                          RVW = getStandardEstimators(getRealizedVarianceSeries(SPXMins_withEta40$R, 2025, 1 / (252 * 405)),
-                                                  SPXMins_withEta40$R,
+                          RVW = getStandardEstimators(getRealizedVarianceSeries(SPXMin$adjRate, 2025, 1 / (252 * 405)),
+                                                  SPXMin$adjRate,
                                                   1 / (252 * 405)),
-                          RvM = getStandardEstimators(getRealizedVarianceSeries(SPXMins_withEta40$R, 8505, 1 / (252 * 405)),
-                                                  SPXMins_withEta40$R,
+                          RvM = getStandardEstimators(getRealizedVarianceSeries(SPXMin$adjRate, 8505, 1 / (252 * 405)),
+                                                  SPXMin$adjRate,
                                                   1 / (252 * 405))) %>%
   as.data.frame()
 

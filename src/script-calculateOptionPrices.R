@@ -22,7 +22,7 @@ optPrice   <- matrix(NA, length(strikes), length(pricesList))
 optPriceSd <- optPrice
 
 for(j in 1:length(pricesList)){
-  result          <- getOptionPriceFromMartingaleScenario(strikes, pricesList[[j]], "C")
+  result          <- getOptionPriceFromMartingaleScenario(strikes, pricesList[[j]], "C", SPX_mid_rates$r %>% last(), 1 / 12)
   optPrice[, j]   <- result$optionPrice
   optPriceSd[, j] <- result$optionPriceSd
 }

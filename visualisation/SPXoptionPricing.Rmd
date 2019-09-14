@@ -18,7 +18,7 @@ library(ggplot2)
 library(reshape2)
 library(ggthemes)
 library(gtable)
-library(gridExtra)
+library(gridExtra)   
 
 strikes <- seq(from = 2025, to = 2975, by = 25)
 
@@ -102,19 +102,32 @@ grid.arrange(implVol, implVol2, nrow = 1)
 ```{r, fig.width=15, fig.height=5}
 
 data.frame(strike = strikes,
-           MCMC40   = optPrice[, 1],
+          MCMC40   = optPrice[, 1],
+           MCMC40sd = (optPriceCIUpper[, 1] - optPrice[, 1]) / 1.96,
            MCMC80   = optPrice[, 2],
+           MCMC80sd = (optPriceCIUpper[, 2] - optPrice[, 2]) / 1.96,
            MCMC120   = optPrice[, 3],
+           MCMC120sd = (optPriceCIUpper[, 3] - optPrice[, 3]) / 1.96,
            MCMC160   = optPrice[, 4],
+           MCMC160sd = (optPriceCIUpper[, 4] - optPrice[, 4]) / 1.96,
            MCMC200   = optPrice[, 5],
+           MCMC200sd = (optPriceCIUpper[, 5] - optPrice[, 5]) / 1.96,
            MCMC240   = optPrice[, 6],
+           MCMC240sd = (optPriceCIUpper[, 6] - optPrice[, 6]) / 1.96,
            MCMC280   = optPrice[, 7],
+           MCMC280sd = (optPriceCIUpper[, 7] - optPrice[, 7]) / 1.96,
            MCMC320   = optPrice[, 8],
+           MCMC320sd = (optPriceCIUpper[, 8] - optPrice[, 8]) / 1.96,
            MCMC360   = optPrice[, 9],
+           MCMC360sd = (optPriceCIUpper[, 9] - optPrice[, 9]) / 1.96,
            MCMC400   = optPrice[, 10],
+           MCMC400sd = (optPriceCIUpper[, 10] - optPrice[, 10]) / 1.96,
            RVD       = optPrice[, 11],
+           RVDsd     = (optPriceCIUpper[, 11] - optPrice[, 11]) / 1.96,
            RVW       = optPrice[, 12],
+           RVWsd     = (optPriceCIUpper[, 12] - optPrice[, 12]) / 1.96,
            RVM       = optPrice[, 13],
+           RVMsd     = (optPriceCIUpper[, 13] - optPrice[, 13]) / 1.96,
            BS        = blackScholesPrices %>%
              select(price) %>%
              pull(),
@@ -122,7 +135,9 @@ data.frame(strike = strikes,
              arrange(strike) %>%
              filter(strike >= 2000 & strike <= 3000) %>%
              select(mid_price) %>%
-             pull()) %>%
+             pull()) -> priceTable
+
+priceTable[, c(1, 2* (1:14), 29)] %>%
   melt(id="strike") %>%
     ggplot(., aes(x = strike, y = value, colour = variable)) +
   geom_line() +
@@ -131,24 +146,9 @@ data.frame(strike = strikes,
   labs(y = "cena",
        x = "cena wykonania") -> price
 
-data.frame(strike = strikes,
-           MCMC40   = optPrice[, 1],
-           MCMC80   = optPrice[, 2],
-           MCMC120   = optPrice[, 3],
-           MCMC160   = optPrice[, 4],
-           MCMC200   = optPrice[, 5],
-           MCMC240   = optPrice[, 6],
-           MCMC280   = optPrice[, 7],
-           MCMC320   = optPrice[, 8],
-           MCMC360   = optPrice[, 9],
-           MCMC400   = optPrice[, 10],
-           rynek     = marketOptionQuotes %>%
-             arrange(strike) %>%
-             filter(strike >= 2000 & strike <= 3000) %>%
-             select(mid_price) %>%
-             pull()) %>%
+priceTable[, c(1, 2* (1:10), 29)]  %>%
   melt(id="strike") %>%
-    ggplot(., aes(x = strike, y = value, colour = variable)) +
+  ggplot(., aes(x = strike, y = value, colour = variable)) +
   geom_line() + 
   theme_bw() +
   theme(legend.title = element_blank()) +
@@ -158,12 +158,44 @@ data.frame(strike = strikes,
 grid.arrange(price, price2, nrow = 1)
 ```
 
-## Example histogram
 
+## Price table
 ```{r}
-price200 <- readRDS("../results/prices/price200.Rds")
-hist(log(price200 / 2509.575), breaks = 200, prob = TRUE, ylim = c(0, 10))
-lines(seq(from = -2, to = 2, by = 0.001), dnorm(seq(from = -2, to = 2, by = 0.001), mean = 0.002331519,
-                                                sd = 0.1576664 * sqrt (21 / 252)), col = "red")
-```
+priceTable[, c(1, 2* (1:14), 29)] %>%
+  kable("latex",
+        booktabs = T,
+        caption = "Prices",
+        digits = 2) %>%
+  kable_styling(font_size = 8)
 
+priceTable[, c(1, 2 * (1:13) + 1)] %>%
+  kable("latex",
+        booktabs = T,
+        caption = "Prices stdev",
+        digits = 5) %>%
+  kable_styling(font_size = 8)
+
+cbind(priceTable[, 1],
+          impliedVol) %>%
+  kable("latex",
+        booktabs = T,
+        caption = "Implied vol",
+        digits = 5) %>%
+  kable_styling(font_size = 8)
+
+cbind(priceTable[, 1],
+          impliedVolCIUpper) %>%
+  kable("latex",
+        booktabs = T,
+        caption = "Implied vol CI Upper",
+        digits = 5) %>%
+  kable_styling(font_size = 8)
+
+cbind(priceTable[, 1],
+          impliedVolCILower) %>%
+  kable("latex",
+        booktabs = T,
+        caption = "Implied vol CI Lower",
+        digits = 5) %>%
+  kable_styling(font_size = 8)
+```
