@@ -1,4 +1,4 @@
-getOptionPriceFromMartingaleScenario <- function(strikes, prices, type){
+getOptionPriceFromMartingaleScenario <- function(strikes, prices, type, r, ttm){
   prices <- prices %>% na.omit()
   
   optionPrice   <- numeric(length(strikes))
@@ -12,6 +12,8 @@ getOptionPriceFromMartingaleScenario <- function(strikes, prices, type){
     }
     
     payoff <- ifelse(payoff < 0, 0, payoff)
+    
+    payoff <- payoff * exp(-r * ttm)
     
     optionPrice[i]   <- mean(payoff)
     optionPriceSd[i] <- sd(payoff) / sqrt(length(prices))
