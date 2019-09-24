@@ -1,0 +1,199 @@
+---
+title: Bayesowska estymacja parametrów strukturalnych ciągłego modelu GARCH i procesu
+  zmienności przy wykorzystaniu markowowskich algorytmów Monte Carlo
+author: "Przemysław Ryś"
+date: "27 września 2019"
+output:
+  beamer_presentation:
+    theme: "Warsaw"
+    colortheme: "default"
+    toc: true
+    fig_caption: false
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(dplyr)
+library(lubridate)
+library(xts)
+```
+
+# Wprowadzenie i motywacja
+
+## Instrumenty pochodne
+
+Rozważamy przestrzeń probabilistyczną $(\Omega, \mathcal{F},\mathbb{P})$ wraz z filtracją $(\mathcal{F}_t)_{t \in [0,T^*]}$.
+
+- Proces cen - $\mathcal{F}_t$-adaptowalny proces stochastyczny $(B_t, S_t)_{t \in [0,T^*]}$ o wartościach rzeczywistych , taki że $B_t = e^{rt}$ oraz $S_t$ jest ciągłym semimartyngałem.
+- Instrument pochodny - instrument wypłacający w chwili T kwotę zależną od przebiegu procesu cen.
+    - kontrakt terminowy forward wypłaca $(S_T - K)$ dla $K \in \mathbb{R}$
+    - opcja europejska kupna (call) wypłaca $(S_T - K)^+$ dla $K \in \mathbb{R}$
+    - opcja binarna kupna (call) wypłaca $\chi_{(S_T-K>0)}$ dla $K \in \mathbb{R}$
+  
+## Wycena bezarbitrażowa (martyngałowa)
+  
+Rozważmy wypłatę postaci $f(S_T)$. Jeśli istnieje prognozowalny proces $\phi_t = (\phi^0_t, \phi^1_t)$ o wartościach w $\mathbb{R}^2$ taki, że:
+
+- $\forall t \in [0, T]\ d\Big(\phi_t^0 B_t + \phi_t^1 S_t \Big) = \phi_t^0 dB_t + \phi_t^1 dS_t$,
+- $\forall {\omega \in \Omega}\ \ \phi_T^0 B_0 + \phi_T^1 S_T = f(S_T)$
+
+to proces $\phi_t$ nazywamy **strategią replikującą** a **uczciwą ceną instrumentu** o wypłacie $f(S_T)$ w chwili $t=0$ nazywamy wyrażenie $\Pi_{f(S_T),0} =  \phi_0^0 B_0 + \phi_0^1 S_0$.
+
+- $\Pi_{f(S_T),0} = \frac{1}{S^0_T}\mathbb{E_Q}f(S_T)$, gdzie $\mathbb{Q}$ - miara martyngałowa.
+
+## Model Blacka-Scholesa 
+
+Filtracja $\mathcal{F}_t$ jest generowana przez proces Wienera $W_t$, a $S_t$ jest geometrycznym ruchem Browna:
+$$dS_t = \mu dt + \sigma dW_t,\ \ \mu\in \mathbb{R}, \sigma > 0, S_0 > 0$$
+$$S_t = S_0 e^{(\mu - 0.5 \sigma^2)t + \sigma W_t}$$
+
+- jeden z pierwszych, powszechnie stosowany model,
+- łatwy do kalibracji,
+- wzory analityczne na ceny niektórych instrumentów,
+- łatwe symulowanie obserwacji procesu cen na potrzeby metod Monte Carlo
+
+## Stochastyczna zmienność
+
+```{r}
+layout(matrix(1:2,2,1))
+SPX <- readRDS("~/GitHub/Markov-chain-Monte-Carlo-COGARCH/data/SPX_mid_rates.Rds") %>%
+  select(timestamp,
+         mid_price) %>%
+ filter(row_number() %% 60 == 0) %>%
+  mutate(rate = diff.xts(log(mid_price))) %>%
+  select(timestamp, rate)
+
+SPX %>%
+  plot(type = "l",
+       main = "Godzinowe przyrosty logarytmiczne indeksu S&P500",
+       ylim =  c(-0.05, 0.05))
+
+SPX %>%
+  mutate(rate = rnorm(nrow(SPX)) * sd(SPX$rate, na.rm = TRUE) + mean(SPX$rate, na.rm = TRUE)) %>%
+  plot(type = "l",
+       main = "Godzinowe przyrosty logarytmiczne w modelu Blacka-Scholesa kalibrowanym dla indeksu S&P500",
+       ylim =  c(-0.05, 0.05))
+
+```
+
+## Ciągły model GARCH
+
+Filtracja $\mathcal{F}_t$ jest generowana przez dwuwymiarowy proces Wienera $(W_t, \tilde{W_t})$, a $S_t$ jest określony przez następujący układ stochastycznych równań różniczkowych:
+
+$$\begin{cases}
+dS_t = \mu_tS_tdt+\sqrt{\nu_t}S_tdW_t \\
+d\nu_t = \kappa(\nu - \nu_t)dt + \eta \nu_td\tilde{W}_t, \\
+\end{cases}$$
+gdzie $S_0$ jest dodatnią zmienną $\mathcal{F}_0$-mierzalną.
+
+- uwzględnia stochastyczną zmienność $\nu_t$ jest procesem stochastycznym o wahaniach proporcjonalnych do $\eta$,
+- własność powrotu procesu $\nu_t$ do poziomu $\nu$ z siłą $\kappa$,
+- wymagający proces kalibracji parametrów,
+- symulowanie obserwacji procesu cen na potrzeby metod Monte Carlo tylko w przybliżeniu poprzez schematy dyskretyzacyjne,
+
+# Estymacja zmienności i parametrów strukturalnych modelu
+
+## Problem estymacji
+
+Dysponujemy obserwacjami notowań $S_t$ w dyskretnych, równoodległych momentach $\{t_1, ..., t_n\}$, co $\Delta_t$.
+
+Celem jest estymacja wartości procesu zmienności $\sqrt{\nu_t}$ w tych punktach czasu oraz wartości parametrów ciągłego modelu GARCH: $\delta, \kappa, \nu, \eta$.
+
+## Przekształcenie i dyskretyzacja
+
+Rozpatrujemy przyrosty logarytmiczne $R_t = ln(S_t) - ln(S_{t-\Delta_t})$. Po zastosowaniu wzoru Itô i dyskretyzacji Eulera–Maruyamy dostajemy:
+$$\begin{cases}
+R_t \approx \delta \Delta_t \nu_{t - \Delta_t}  + \sqrt{\nu_{t - \Delta_t}}(W_t - W_{t - \Delta_t}) \\
+\nu_t \approx \nu_{t - \Delta_t} + \kappa(\nu - \nu_{t-\Delta_t})\Delta_t + \eta \nu_{t-\Delta_t}(\tilde{W}_t - \tilde{W}_{t - \Delta_t}) \\
+\end{cases}$$
+
+co daje schemat:
+
+$$ \begin{cases}
+R_i = \gamma V_{i-1} + \sqrt{V_{i-1}}\tilde{\epsilon_i} \\
+V_i = \alpha + \beta V_{i-1} + \eta V_{i-1}\bar{\epsilon_i} \\
+\end{cases} $$
+gdzie $(\epsilon_1, ..., \epsilon_n, \bar{\epsilon_1 }, ..., \bar{\epsilon_n}) \sim_{iid} \mathcal{N}(0,\Delta_t)$ oraz $\gamma$ = $\delta \Delta_t$, $\alpha = \kappa \nu \Delta_t$, $\beta = 1 - \kappa \Delta_t$.
+
+
+
+## Standardowe podejście
+
+Bierzemy tzw. wariancję zrealizowaną o oknie estymacji długości $n$: $V_t \approx \frac{1}{\Delta_t} \frac{1}{n+1}\sum_{i=0}^n R_{t-i}^2$ i na jej podstawie wyznaczamy estymatory parametrów.
+
+$$\begin{cases}
+\hat{\gamma} = \frac{1}{n}\sum_{i=1}^n \frac{R_i}{V_{i-1}} \\
+\hat{\beta} = \frac{\frac{1}{n} \sum_{i=1}^n \frac{V_i}{V_{i-1}} - \frac{1}{n} \sum_{i=1}^n V_i \frac{1}{n} \sum_{i=1}^n V_{i-1}^{-1}}{1 - \frac{1}{n} \sum_{i=1}^n V_i \frac{1}{n} \sum_{i=1}^n V_{i-1}^{-1}} \\
+\hat{\alpha} = \big(\frac{1 - \frac{1}{n} \sum_{i=1}^n \frac{V_i}{V_{i-1}}}{1 - \frac{1}{n} \sum_{i=1}^n V_i \frac{1}{n} \sum_{i=1}^n V_{i-1}^{-1}}\big)\frac{1}{n} \sum_{i=1}^n V_i \\
+\hat{\eta} =  \big( \frac{1}{dt} (\frac{1}{n} \sum_{i=1}^n(\frac{V_i}{V_{i-1}})^2 - (\frac{1}{n} \sum_{i=1}^n \frac{V_i}{V_{i-1}})^2 - \\ \ \ \ - \big(\frac{1 - \frac{1}{n} \sum_{i=1}^n\frac{V_i}{V_{i-1}}}{1 - \frac{1}{n} \sum_{i=1}^n V_i\frac{1}{n} \sum_{i=1}^n V_{i-1}^{-1}}\big)^2 \\ - \ \ (\frac{1}{n} \sum_{i=1}^n V_i)^2 (\frac{1}{n} \sum_{i=1}^n(\frac{1}{V_{i-1}})^2 - (\frac{1}{n} \sum_{i=1}^n \frac{1}{V_{i-1}})^2)) \big)^{0.5}
+\end{cases}$$
+
+
+## Podejście bayesowskie i MCMC
+
+Chcemy wyznaczyć wektor wartości oczekiwanych rozkładu $\rho(\gamma, \alpha, \beta,\eta^2,V_0,...,V_n|R_1,...,R_n)$, wykorzystamy w tym celu próbnik Gibbsa, który bazuje na symulowaniu obserwacji z rozkładów:
+
+- $\rho(\gamma | \alpha, \beta, \eta, V, R) \propto \rho(R|\gamma, V) \rho(\gamma)$,
+- $\rho(\alpha,\beta | \gamma, \eta, V, R) \propto \prod_{i=1}^n \rho(V_i | \alpha, \beta, \eta, V_{i-1})\rho(\alpha, \beta)$, 
+- $\rho(\eta^2 | \gamma, \alpha, \beta, V, R) \propto \rho(V|\alpha, \beta, \eta^2) \rho(\eta^2)$,
+- $\rho(V_0|\gamma, \alpha, \beta, \eta, R, V_{-0}) \propto \rho(V_1|V_0,  \alpha, \beta, \eta^2)\rho(R_1| V_0, \gamma)\rho(V_0)$,
+- ..., 
+- $\rho(V_n|\gamma, \alpha, \beta, \eta, R, V_{-n})$.
+
+## Podejście bayesowskie i MCMC (2)
+
+Postaci tych rozkładów warunkowych wyznaczamy, wykorzystując podejście bayesowskie, na podstawie obserwacji oraz przyjętych rozkładów a priori:
+
+- jednowymiarego rozkład normalnego dla $\gamma$,
+- dwuwymiarowego rozkład normalnego o macierzy diagonalnej dla $(\alpha, \beta)$,
+- rozkładu \emph{inverse-gamma} dla nieujemnej zmiennej $\eta^2$,
+- nieinformatywnych dla $V_0,...,V_n$.
+
+Ich parametry wyznaczamy metodą momentów na podstawie estymatorów uzyskanych standardową metodą.
+
+## Projekt i implementacja metody
+
+Finalnie algorytm markowowskiego Monte Carlo ma następujący krok:
+
+- $\rho(\gamma | \alpha, \beta, \eta, V, R) \sim \mathcal{N}$,
+- $\rho(\alpha,\beta | \gamma, \eta, V, R) \sim \mathcal{N}$,
+- $\rho(\eta^2 | \gamma, \alpha, \beta, V, R) \sim Inverse-Gamma$,
+- $\rho(V_0 | \gamma, \alpha, \beta, \eta, R, V_{-0}) \sim algorytm\ Metropolisa-Hastingsa$,
+- $\forall_{t \in \{1,...,n-1\}}\  \rho(V_t | \gamma, \alpha, \beta, \eta, R, V_{-t}) \sim algorytm\ MH$,
+- $\rho(V_n | \gamma, \alpha, \beta, \eta, R, V_{-n}) \sim \mathcal{N}$,
+
+Algorytm został zaimplementowany na potrzeby pracy w środowisku R oraz języku C++. Punktami startowymi były oszacowania parametrów uzyskane standardowymi metodami.
+
+# Test metod na danych symulowanych
+
+## Wyniki estymacji zmienności
+
+![](img/zmiennosc.png)
+
+## Ewolucja oszacowań w czasie
+
+![](img/zbieznosc.png)
+
+## Uzyskane oszacowania parametrów
+
+![](img/parametry1.png)
+
+## Uzyskane oszacowania parametrów metodą bez $\eta$
+
+![](img/parametry2.png)
+
+# Wyniki części aplikacyjnej
+
+## Wyniki estymacji zmienności
+
+![](img/zmiennoscSPX.png)
+
+## Uzyskane oszacowania parametrów
+
+![](img/parametrySPX.png)
+
+## Uzyskane ceny opcji kupna
+
+![](img/cenySPX.png)
+
+# Koniec
