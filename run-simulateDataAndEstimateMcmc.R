@@ -14,25 +14,24 @@ for(i in 1:length(funList)){
   source(funList[i])
 }
 
-#______________________________________
-#   Declare parameters for simulations                     
-#______________________________________
-
+# Declare parameters for simulations.                     
 r     <- 0.02
 delta <- -0.2
 kappa <- 0.5
 nu    <- 0.4
 eta   <- 2.0
 
-freq  <- "mins" # mins, hours or days
+# Choose "mins", "hours" or "days".
+freq  <- "mins"
 
-resultPath <- "results/RollerCoasterDevilMins_withEta.Rds"
+# Specify path where script saves results.
+resultPath <- "pathToResults.Rds"
 
-#_____________________________________
-#  0. Generate the data                     
-#_____________________________________
 
-# assumptions: 405 mins per day, 7 hours per day, 21 days per month, 252 days per year
+# 0. Generating the data.  
+# ____________________
+
+# Assumptions: 405 mins per day, 7 hours per day, 21 days per month, 252 days per year.
 if(freq == "mins"){
   dt    <- 1 / (252 * 405)
   N     <- 15 * (252 * 405)
@@ -48,33 +47,30 @@ if(freq == "days"){
   N     <- 15 * (252 * 405)
 }
 
-# calculate new parameters
+# Calculating new parameters.
 schemeParameters <- getSchemeParameters(delta, kappa, nu, eta, dt)
 
 gamma <- schemeParameters$gamma
 alpha <- schemeParameters$alpha
 beta  <- schemeParameters$beta
 
-# generate simulated series
+# Simulating input data.
 v <- generateVSeries(N, initialValue = nu, alpha, beta, eta, dt)
 R <- generateRSeries(gamma, v, dt)
 
-#_____________________________________
-#  1. MCMC estimation: assumptions
-#_____________________________________
 
-# technical settings
+# 1. MCMC estimation: assumptions.
+#________________________________
+
 numberOfLoops <- 20000
 
 source("src/script-setPriorsAndInitialPoints.R")
 vCurrentMAD    <- numeric(numberOfLoops)
 vCurrentMAD[1] <- mean(abs(vCurrent - v))
 
-#_____________________________________
-#  1. MCMC estimation: core
-#_____________________________________
+#  2. MCMC estimation: core calculations.
+#__________________________
 
-#source("src/script-runMCMC.R")
-#or :
- source("src/script-runMCMCwithEta.R")
-# source("src/script-runMCMwithEtaWithoutV.R")
+# Select "src/script-runMCMC.R" for standard estimation.
+# Or select "src/script-runMCMCWithEta.R" for estimation with fixed eta parameter.
+source("src/script-runMCMC.R")

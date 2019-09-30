@@ -1,4 +1,4 @@
-SPX_mid_rates <- readRDS("data/SPX_mid_rates.Rds")
+dataRates <- readRDS("pathToData.Rds")
 source("src/fun-getOptionPriceFromMartingaleScenario.R")
 
 strikes <- seq(from = 2000, to = 3000, by = 25)
@@ -22,7 +22,7 @@ optPrice   <- matrix(NA, length(strikes), length(pricesList))
 optPriceSd <- optPrice
 
 for(j in 1:length(pricesList)){
-  result          <- getOptionPriceFromMartingaleScenario(strikes, pricesList[[j]], "C", SPX_mid_rates$r %>% last(), 1 / 12)
+  result          <- getOptionPriceFromMartingaleScenario(strikes, pricesList[[j]], "C", dataRates$r %>% last(), 1 / 12)
   optPrice[, j]   <- result$optionPrice
   optPriceSd[, j] <- result$optionPriceSd
 }
@@ -36,7 +36,7 @@ for(i in 11:length(pricesList)){
   lines(strikes, optPrice[, i], col = "red", type = "o")
 }
 
-abline(v = SPX_mid_rates$mid_price %>% last(), col = "blue")
+abline(v = dataRates$mid_price %>% last(), col = "blue")
 
 lines(marketPrice$strike,
       0.5 * marketPrice$mid_price,

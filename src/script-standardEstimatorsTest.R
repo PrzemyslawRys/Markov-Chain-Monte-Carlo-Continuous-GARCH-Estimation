@@ -1,7 +1,6 @@
 library(dplyr)
 library(invgamma)
 library(TTR)
-#library(mvtnorm)
 library(MASS)
 library(Rcpp)
 library(dygraphs)

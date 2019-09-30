@@ -23,7 +23,7 @@ for(i in 2:numberOfLoops){
   
   etaSeries[i]   <- eta
   
-  # Metropolis-Hastings for v
+  # Metropolis-Hastings for v.
   vCurrent <-
     drawVSeriesFromPosteriorMetropolisHastingsRCPP(vCurrent,
                                                    R,
@@ -35,10 +35,10 @@ for(i in 2:numberOfLoops){
                                                    alpha_V,
                                                    beta_V)
   
-  # update vEstimate
+  # Updating vEstimate.
   vEstimate <- vEstimate * (i - 1) / i + vCurrent / i
   
-  # save MAD information about v
+  # Saving MAD statistic for v.
   vCurrentMAD[i]  <- mean(abs(vCurrent - v))
   
   if(i %% 1000 == 0){

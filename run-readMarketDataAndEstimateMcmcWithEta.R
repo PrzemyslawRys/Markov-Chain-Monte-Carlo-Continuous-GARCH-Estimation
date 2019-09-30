@@ -14,9 +14,7 @@ for(i in 1:length(funList)){
   source(funList[i])
 }
 
-#______________________________________
-#   Declare parameters for simulations                     
-#______________________________________
+# Declare parameters for simulations.   
 
 r     <- 0.02
 delta <- 0
@@ -24,15 +22,17 @@ kappa <- 10
 nu    <- 0.1
 eta   <- 4.0
 
-freq  <- "mins" # mins, hours or days
+# Choose "mins", "hours" or "days".
+freq  <- "mins"
 
-resultPath <- "results/SPXMins_withEta400.Rds"
+# Specify path where script saves results.
+resultPath <- "pathToResults.Rds"
+dataPath   <- "pathToData.Rds"
 
-#_____________________________________
 #  0. Generate the data                     
-#_____________________________________
+#______________________
 
-# assumptions: 405 mins per day, 7 hours per day, 21 days per month, 252 days per year
+# Assumptions: 405 mins per day, 7 hours per day, 21 days per month, 252 days per year.
 if(freq == "mins"){
   dt    <- 1 / (252 * 405)
   N     <- 15 * (252 * 405)
@@ -48,31 +48,28 @@ if(freq == "days"){
   N     <- 15 * (252 * 405)
 }
 
-# calculate new parameters
+# Calculating new parameters.
 schemeParameters <- getSchemeParameters(delta, kappa, nu, eta, dt)
 
 gamma <- schemeParameters$gamma
 alpha <- schemeParameters$alpha
 beta  <- schemeParameters$beta
 
-# read data
-R <- readRDS("data/SPX_mid_rates.Rds") %>%
+# Reading data from Rds.
+R <- readRDS(dataPath) %>%
   select(adjRate) %>%
   pull()
 
 N <- length(R) - 1
 
-#_____________________________________
 #  1. MCMC estimation: assumptions
-#_____________________________________
+#_________________________________
 
-# technical settings
 numberOfLoops <- 20000
 
 source("src/script-setPriorsAndInitialPoints.R")
 
-#_____________________________________
-#  1. MCMC estimation: core
-#_____________________________________
+#  2. MCMC estimation: core calculations.
+#________________________________________
 
 source("src/script-runMCMCwithEtawithoutV.R")
