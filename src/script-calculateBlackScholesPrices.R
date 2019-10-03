@@ -1,5 +1,3 @@
-library(dplyr)
-library(Rcpp)
 sourceCpp("src/rcpp-getBlackScholesPrice.cpp")
 SPX             <- readRDS("data/SPX_mid_rates.Rds")
 

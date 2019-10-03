@@ -6,8 +6,8 @@ generateRSeries <- function(gamma, v, dt){
     R[i] <- gamma * v[i - 1] + sqrt(v[i - 1] * dt) * rnorm(1)
   }
   
-  # first observation does not exist, because we don't have volatility
-  # fill it with mean just for codes simplification
+  # First observation does not exist, because we don't have volatility.
+  # Filling it with mean just for codes simplification.
   R[1] <- mean(R[-1])
   
   R
